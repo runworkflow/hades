@@ -1,4 +1,6 @@
 mod app_vault;
+mod auto_lock_runner;
+mod clock;
 mod command_error;
 mod vault_commands;
 
@@ -12,6 +14,7 @@ pub fn run() {
         .setup(|app| {
             let data_directory = app.path().app_data_dir()?;
             app.manage(AppVault::open(&data_directory)?);
+            auto_lock_runner::start(app.handle().clone());
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -20,6 +23,7 @@ pub fn run() {
             vault_commands::unlock_with_password,
             vault_commands::unlock_with_recovery_key,
             vault_commands::lock_vault,
+            vault_commands::report_activity,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

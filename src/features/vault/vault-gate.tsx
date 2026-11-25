@@ -7,9 +7,11 @@ import { CreateVaultScreen } from "./create-vault-screen"
 import { RecoveryKeyScreen } from "./recovery-key-screen"
 import { UnlockScreen } from "./unlock-screen"
 import { useVaultStatus } from "./use-vault"
+import { useVaultLockedEvent } from "./use-vault-locked-event"
 import { VaultScreenLayout } from "./vault-screen-layout"
 
 export function VaultGate() {
+  useVaultLockedEvent()
   const vaultStatus = useVaultStatus()
   const [recoveryKeyToSave, setRecoveryKeyToSave] = useState<string | null>(
     null

@@ -4,7 +4,7 @@ import type { CommandError } from "@/lib/call-command"
 
 import { vaultApi } from "./vault-api"
 
-const vaultStatusQueryKey = ["vault", "status"] as const
+export const vaultStatusQueryKey = ["vault", "status"] as const
 
 export function useVaultStatus() {
   return useQuery({
@@ -12,6 +12,7 @@ export function useVaultStatus() {
     queryFn: vaultApi.getStatus,
     retry: false,
     staleTime: Infinity,
+    refetchOnWindowFocus: "always",
   })
 }
 

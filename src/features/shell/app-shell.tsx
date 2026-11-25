@@ -7,6 +7,7 @@ import { selectItemsForView } from "@/features/items/select-items"
 import { useNavigationHistory } from "@/features/navigation/use-navigation-history"
 import { recentViewId } from "@/features/navigation/view-ids"
 import { sampleFolders, sampleItems } from "@/features/vault/sample-vault"
+import { useActivityReporter } from "@/features/vault/use-activity-reporter"
 import { useLockVault } from "@/features/vault/use-vault"
 
 import { PaneHeader } from "./pane-header"
@@ -16,6 +17,7 @@ export function AppShell() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const navigation = useNavigationHistory(recentViewId)
   const lockVault = useLockVault()
+  useActivityReporter()
 
   const activeFolder = sampleFolders.find(
     (folder) => folder.id === navigation.current

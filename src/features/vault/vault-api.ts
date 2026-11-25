@@ -15,4 +15,7 @@ export const vaultApi = {
   unlockWithRecoveryKey: (recoveryKey: string) =>
     callCommand<void>("unlock_with_recovery_key", { recoveryKey }),
   lock: () => callCommand<void>("lock_vault"),
+  reportActivity: () => callCommand<void>("report_activity"),
 }
+
+export const vaultLockedEvent = "vault-locked"

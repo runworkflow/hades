@@ -10,6 +10,7 @@
     "allow-create-vault",
     "allow-unlock-with-password",
     "allow-unlock-with-recovery-key",
-    "allow-lock-vault"
+    "allow-lock-vault",
+    "allow-report-activity"
   ]
 }

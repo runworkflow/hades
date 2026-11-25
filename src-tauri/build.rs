@@ -4,6 +4,7 @@ const APP_COMMANDS: &[&str] = &[
     "unlock_with_password",
     "unlock_with_recovery_key",
     "lock_vault",
+    "report_activity",
 ];
 
 fn main() {
