@@ -4,6 +4,7 @@ use crate::store::Store;
 use crate::vault::{VaultError, VaultResult, VaultSession};
 
 use super::item::{ItemDetail, ItemSummary, ItemUpdate, NewItem};
+use super::item_bulk::{delete_items, move_items};
 use super::item_changes::{delete_item, update_item};
 use super::item_service::{create_item, get_item, list_items, read_item_field, reveal_item_field};
 
@@ -41,6 +42,16 @@ impl<S: Store> VaultSession<S> {
     pub fn delete_item(&self, id: &str, now_ms: i64) -> VaultResult<()> {
         let vault = self.unlocked_vault().ok_or(VaultError::VaultLocked)?;
         delete_item(self.store(), vault, id, now_ms)
+    }
+
+    pub fn delete_items(&self, ids: &[String], now_ms: i64) -> VaultResult<usize> {
+        let vault = self.unlocked_vault().ok_or(VaultError::VaultLocked)?;
+        delete_items(self.store(), vault, ids, now_ms)
+    }
+
+    pub fn move_items(&self, ids: &[String], folder_id: &str, now_ms: i64) -> VaultResult<usize> {
+        let vault = self.unlocked_vault().ok_or(VaultError::VaultLocked)?;
+        move_items(self.store(), vault, ids, folder_id, now_ms)
     }
 
     pub fn read_item_field(&self, id: &str, key: &str) -> VaultResult<Zeroizing<String>> {

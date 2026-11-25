@@ -13,6 +13,7 @@ pub use vault_settings::VaultSettings;
 
 pub trait Store {
     fn put_envelope(&self, envelope: &Envelope) -> StoreResult<()>;
+    fn put_envelopes(&self, envelopes: &[Envelope]) -> StoreResult<()>;
     fn get_envelope(&self, id: &str) -> StoreResult<Option<Envelope>>;
     fn list_envelopes(&self, kind: EnvelopeKind) -> StoreResult<Vec<Envelope>>;
     fn get_vault_settings(&self) -> StoreResult<Option<VaultSettings>>;

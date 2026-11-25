@@ -29,6 +29,8 @@ pub fn run() {
             vault_commands::report_activity,
             folder_commands::list_folders,
             folder_commands::create_folder,
+            folder_commands::update_folder,
+            folder_commands::delete_folder,
             item_commands::list_items,
             item_commands::get_item,
             item_commands::create_item,
@@ -36,6 +38,8 @@ pub fn run() {
             item_commands::copy_item_field,
             item_commands::update_item,
             item_commands::delete_item,
+            item_commands::delete_items,
+            item_commands::move_items,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -24,3 +24,23 @@ export function useCreateFolder() {
       queryClient.invalidateQueries({ queryKey: foldersQueryKey }),
   })
 }
+
+export function useUpdateFolder(folderId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation<Folder, CommandError, NewFolderInput>({
+    mutationFn: (input) => folderApi.update(folderId, input),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: foldersQueryKey }),
+  })
+}
+
+export function useDeleteFolder(folderId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation<void, CommandError, void>({
+    mutationFn: () => folderApi.remove(folderId),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: foldersQueryKey }),
+  })
+}

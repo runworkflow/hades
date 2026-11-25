@@ -77,6 +77,18 @@ pub fn list_items<S: Store>(store: &S, vault: &UnlockedVault) -> VaultResult<Vec
     Ok(items)
 }
 
+pub(crate) fn count_items_in_folder<S: Store>(
+    store: &S,
+    vault: &UnlockedVault,
+    folder_id: &str,
+) -> VaultResult<usize> {
+    let items = list_items(store, vault)?;
+    Ok(items
+        .iter()
+        .filter(|item| item.folder_id == folder_id)
+        .count())
+}
+
 pub fn get_item<S: Store>(store: &S, vault: &UnlockedVault, id: &str) -> VaultResult<ItemDetail> {
     let envelope = find_item_envelope(store, id)?;
     let data = read_data(vault, &envelope)?;

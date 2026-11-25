@@ -68,7 +68,7 @@ pub fn list_folders<S: Store>(store: &S, vault: &UnlockedVault) -> VaultResult<V
     Ok(folders)
 }
 
-fn read_folder(vault: &UnlockedVault, envelope: &Envelope) -> VaultResult<Folder> {
+pub(super) fn read_folder(vault: &UnlockedVault, envelope: &Envelope) -> VaultResult<Folder> {
     let plaintext = open_record(vault.vault_key(), envelope)?;
     let data: FolderData = serde_json::from_slice(&plaintext)
         .map_err(|_| VaultError::Store(StoreError::CorruptRecord))?;

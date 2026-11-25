@@ -3,7 +3,7 @@ import { useState } from "react"
 import type { Folder } from "@/features/folders/folder-types"
 
 import type { VaultItem } from "./item-types"
-import { ItemsHeader } from "./items-header"
+import { ItemsHeader, type FolderActions } from "./items-header"
 import { ItemsTable } from "./items-table"
 import { ItemsTabs, type ItemsTab } from "./items-tabs"
 import { filterItemsBySearch } from "./select-items"
@@ -15,6 +15,8 @@ type ItemsViewProps = {
   openItemId: string | null
   onOpenItem: (itemId: string) => void
   onNewItem: () => void
+  onItemsDeleted: (itemIds: string[]) => void
+  folderActions: FolderActions | null
 }
 
 export function ItemsView({
@@ -24,6 +26,8 @@ export function ItemsView({
   openItemId,
   onOpenItem,
   onNewItem,
+  onItemsDeleted,
+  folderActions,
 }: ItemsViewProps) {
   const [searchText, setSearchText] = useState("")
   const [activeTab, setActiveTab] = useState<ItemsTab>("items")
@@ -35,6 +39,7 @@ export function ItemsView({
         searchText={searchText}
         onSearchChange={setSearchText}
         onNewItem={onNewItem}
+        folderActions={folderActions}
       />
       <div className="my-6">
         <ItemsTabs activeTab={activeTab} onChange={setActiveTab} />
@@ -45,6 +50,7 @@ export function ItemsView({
           folders={folders}
           openItemId={openItemId}
           onOpenItem={onOpenItem}
+          onItemsDeleted={onItemsDeleted}
         />
       ) : (
         <p className="py-20 text-center text-ink-muted">No activity yet.</p>

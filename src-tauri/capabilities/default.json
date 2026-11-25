@@ -14,12 +14,16 @@
     "allow-report-activity",
     "allow-list-folders",
     "allow-create-folder",
+    "allow-update-folder",
+    "allow-delete-folder",
     "allow-list-items",
     "allow-get-item",
     "allow-create-item",
     "allow-reveal-item-field",
     "allow-copy-item-field",
     "allow-update-item",
-    "allow-delete-item"
+    "allow-delete-item",
+    "allow-delete-items",
+    "allow-move-items"
   ]
 }

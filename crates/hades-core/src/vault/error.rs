@@ -25,6 +25,8 @@ pub enum VaultError {
     InvalidIcon,
     #[error("the folder was not found")]
     FolderNotFound,
+    #[error("the folder still contains {item_count} item(s)")]
+    FolderNotEmpty { item_count: usize },
     #[error("the item was not found")]
     ItemNotFound,
     #[error("an item field is not valid")]

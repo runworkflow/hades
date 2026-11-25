@@ -1,5 +1,7 @@
 import { useState, type ReactNode } from "react"
 
+import { DeleteFolderDialog } from "@/features/folders/delete-folder-dialog"
+import { EditFolderDialog } from "@/features/folders/edit-folder-dialog"
 import type { Folder } from "@/features/folders/folder-types"
 
 import { ItemDetailPanel } from "./item-detail-panel"
@@ -14,6 +16,7 @@ type ItemsWorkspaceProps = {
   viewId: string
   folders: Folder[]
   items: VaultItem[]
+  onFolderDeleted: () => void
 }
 
 export function ItemsWorkspace({
@@ -22,13 +25,15 @@ export function ItemsWorkspace({
   viewId,
   folders,
   items,
+  onFolderDeleted,
 }: ItemsWorkspaceProps) {
   const [openItemId, setOpenItemId] = useState<string | null>(null)
   const [isNewItemOpen, setIsNewItemOpen] = useState(false)
+  const [isEditFolderOpen, setIsEditFolderOpen] = useState(false)
+  const [isDeleteFolderOpen, setIsDeleteFolderOpen] = useState(false)
 
-  const currentFolderId = folders.some((folder) => folder.id === viewId)
-    ? viewId
-    : null
+  const currentFolder = folders.find((folder) => folder.id === viewId)
+  const currentFolderId = currentFolder?.id ?? null
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1">
@@ -41,6 +46,17 @@ export function ItemsWorkspace({
           openItemId={openItemId}
           onOpenItem={setOpenItemId}
           onNewItem={() => setIsNewItemOpen(true)}
+          onItemsDeleted={(itemIds) => {
+            if (openItemId && itemIds.includes(openItemId)) setOpenItemId(null)
+          }}
+          folderActions={
+            currentFolder
+              ? {
+                  onEdit: () => setIsEditFolderOpen(true),
+                  onDelete: () => setIsDeleteFolderOpen(true),
+                }
+              : null
+          }
         />
       </div>
       {openItemId && (
@@ -58,6 +74,21 @@ export function ItemsWorkspace({
         onClose={() => setIsNewItemOpen(false)}
         onCreated={(item) => setOpenItemId(item.id)}
       />
+      {currentFolder && (
+        <>
+          <EditFolderDialog
+            isOpen={isEditFolderOpen}
+            folder={currentFolder}
+            onClose={() => setIsEditFolderOpen(false)}
+          />
+          <DeleteFolderDialog
+            isOpen={isDeleteFolderOpen}
+            folder={currentFolder}
+            onClose={() => setIsDeleteFolderOpen(false)}
+            onDeleted={onFolderDeleted}
+          />
+        </>
+      )}
     </div>
   )
 }

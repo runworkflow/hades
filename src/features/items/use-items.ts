@@ -86,3 +86,35 @@ export function useDeleteItem(itemId: string) {
     },
   })
 }
+
+type MoveItemsInput = {
+  itemIds: string[]
+  folderId: string
+}
+
+export function useDeleteItems() {
+  const queryClient = useQueryClient()
+
+  return useMutation<number, CommandError, string[]>({
+    mutationFn: itemApi.removeMany,
+    onSuccess: (_count, itemIds) => {
+      for (const itemId of itemIds) {
+        queryClient.removeQueries({ queryKey: ["item", itemId] })
+      }
+      return queryClient.invalidateQueries({ queryKey: itemsQueryKey })
+    },
+  })
+}
+
+export function useMoveItems() {
+  const queryClient = useQueryClient()
+
+  return useMutation<number, CommandError, MoveItemsInput>({
+    mutationFn: ({ itemIds, folderId }) => itemApi.moveMany(itemIds, folderId),
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: itemsQueryKey }),
+        queryClient.invalidateQueries({ queryKey: ["item"] }),
+      ]),
+  })
+}

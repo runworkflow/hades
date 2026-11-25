@@ -7,6 +7,8 @@ const APP_COMMANDS: &[&str] = &[
     "report_activity",
     "list_folders",
     "create_folder",
+    "update_folder",
+    "delete_folder",
     "list_items",
     "get_item",
     "create_item",
@@ -14,6 +16,8 @@ const APP_COMMANDS: &[&str] = &[
     "copy_item_field",
     "update_item",
     "delete_item",
+    "delete_items",
+    "move_items",
 ];
 
 fn main() {

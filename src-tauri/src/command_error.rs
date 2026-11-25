@@ -19,6 +19,11 @@ impl CommandError {
     }
 }
 
+fn folder_not_empty_message(item_count: usize) -> String {
+    let noun = if item_count == 1 { "item" } else { "items" };
+    format!("Move or delete the {item_count} {noun} in this folder first.")
+}
+
 impl From<VaultError> for CommandError {
     fn from(error: VaultError) -> Self {
         let message = error.to_string();
@@ -33,6 +38,9 @@ impl From<VaultError> for CommandError {
             VaultError::InvalidName { .. } => Self::new("invalid_name", message),
             VaultError::InvalidIcon => Self::new("invalid_icon", message),
             VaultError::FolderNotFound => Self::new("folder_not_found", message),
+            VaultError::FolderNotEmpty { item_count } => {
+                Self::new("folder_not_empty", folder_not_empty_message(item_count))
+            }
             VaultError::ItemNotFound => Self::new("item_not_found", message),
             VaultError::InvalidField => Self::new("invalid_field", message),
             VaultError::InvalidItemKind => Self::new("invalid_item_kind", message),
