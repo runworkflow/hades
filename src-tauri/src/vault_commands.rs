@@ -33,7 +33,7 @@ pub struct CreatedVault {
     recovery_key: String,
 }
 
-fn lock_session(
+pub fn lock_session(
     vault: &AppVault,
 ) -> Result<MutexGuard<'_, VaultSession<SqliteStore>>, CommandError> {
     vault.session.lock().map_err(|_| CommandError::internal())
@@ -88,6 +88,7 @@ pub fn unlock_with_recovery_key(
 #[tauri::command(async)]
 pub fn lock_vault(vault: State<'_, AppVault>) -> Result<(), CommandError> {
     lock_session(&vault)?.lock();
+    vault.clipboard.clear_now();
     Ok(())
 }
 

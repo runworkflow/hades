@@ -9,35 +9,46 @@ type ItemRowProps = {
   item: VaultItem
   folderName: string
   isSelected: boolean
+  isOpen: boolean
   onToggleSelected: () => void
+  onOpen: () => void
 }
 
 export function ItemRow({
   item,
   folderName,
   isSelected,
+  isOpen,
   onToggleSelected,
+  onOpen,
 }: ItemRowProps) {
   const kind = itemKinds[item.kind]
   const KindIcon = kind.icon
+  const stateClasses = isOpen ? "bg-accent/10" : "hover:bg-white/[0.03]"
 
   return (
     <div
-      className={`${itemsGridClass} h-14 border-b border-line px-1 hover:bg-white/[0.03]`}
+      onClick={onOpen}
+      className={`${itemsGridClass} h-14 cursor-pointer border-b border-line px-1 ${stateClasses}`}
     >
-      <Checkbox
-        label={`Select ${item.name}`}
-        isChecked={isSelected}
-        onToggle={onToggleSelected}
-      />
-      <div className="flex min-w-0 items-center gap-3.5">
+      <span onClick={(event) => event.stopPropagation()}>
+        <Checkbox
+          label={`Select ${item.name}`}
+          isChecked={isSelected}
+          onToggle={onToggleSelected}
+        />
+      </span>
+      <button
+        type="button"
+        className="flex min-w-0 items-center gap-3.5 text-left"
+      >
         <span
           className={`grid size-8 shrink-0 place-items-center rounded-lg ${kind.tileClass}`}
         >
           <KindIcon size={17} />
         </span>
         <span className="truncate text-base">{item.name}</span>
-      </div>
+      </button>
       <span className="text-sm text-ink-muted">{kind.label}</span>
       <span className="truncate text-sm text-ink-muted">{folderName}</span>
       <span className="text-sm text-ink-muted">

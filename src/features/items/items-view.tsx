@@ -12,9 +12,19 @@ type ItemsViewProps = {
   title: string
   items: VaultItem[]
   folders: Folder[]
+  openItemId: string | null
+  onOpenItem: (itemId: string) => void
+  onNewItem: () => void
 }
 
-export function ItemsView({ title, items, folders }: ItemsViewProps) {
+export function ItemsView({
+  title,
+  items,
+  folders,
+  openItemId,
+  onOpenItem,
+  onNewItem,
+}: ItemsViewProps) {
   const [searchText, setSearchText] = useState("")
   const [activeTab, setActiveTab] = useState<ItemsTab>("items")
 
@@ -24,6 +34,7 @@ export function ItemsView({ title, items, folders }: ItemsViewProps) {
         title={title}
         searchText={searchText}
         onSearchChange={setSearchText}
+        onNewItem={onNewItem}
       />
       <div className="my-6">
         <ItemsTabs activeTab={activeTab} onChange={setActiveTab} />
@@ -32,6 +43,8 @@ export function ItemsView({ title, items, folders }: ItemsViewProps) {
         <ItemsTable
           items={filterItemsBySearch(items, searchText)}
           folders={folders}
+          openItemId={openItemId}
+          onOpenItem={onOpenItem}
         />
       ) : (
         <p className="py-20 text-center text-ink-muted">No activity yet.</p>

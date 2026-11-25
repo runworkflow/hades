@@ -5,6 +5,15 @@ const APP_COMMANDS: &[&str] = &[
     "unlock_with_recovery_key",
     "lock_vault",
     "report_activity",
+    "list_folders",
+    "create_folder",
+    "list_items",
+    "get_item",
+    "create_item",
+    "reveal_item_field",
+    "copy_item_field",
+    "update_item",
+    "delete_item",
 ];
 
 fn main() {

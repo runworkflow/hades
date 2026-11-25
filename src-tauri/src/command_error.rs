@@ -29,6 +29,13 @@ impl From<VaultError> for CommandError {
             VaultError::IncorrectPassword => Self::new("incorrect_password", message),
             VaultError::InvalidRecoveryKey => Self::new("invalid_recovery_key", message),
             VaultError::IncorrectRecoveryKey => Self::new("incorrect_recovery_key", message),
+            VaultError::VaultLocked => Self::new("vault_locked", message),
+            VaultError::InvalidName { .. } => Self::new("invalid_name", message),
+            VaultError::InvalidIcon => Self::new("invalid_icon", message),
+            VaultError::FolderNotFound => Self::new("folder_not_found", message),
+            VaultError::ItemNotFound => Self::new("item_not_found", message),
+            VaultError::InvalidField => Self::new("invalid_field", message),
+            VaultError::InvalidItemKind => Self::new("invalid_item_kind", message),
             VaultError::Crypto(_) | VaultError::Store(_) => Self::internal(),
         }
     }

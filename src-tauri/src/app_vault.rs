@@ -7,6 +7,7 @@ use std::sync::Mutex;
 use hades_core::{AutoLockMonitor, AutoLockPolicy, SqliteStore, VaultSession};
 
 use crate::clock::current_unix_millis;
+use crate::secret_clipboard::SecretClipboard;
 
 const VAULT_FILE_NAME: &str = "vault.db";
 const OWNER_ONLY_DIRECTORY_MODE: u32 = 0o700;
@@ -14,6 +15,7 @@ const OWNER_ONLY_DIRECTORY_MODE: u32 = 0o700;
 pub struct AppVault {
     pub session: Mutex<VaultSession<SqliteStore>>,
     pub auto_lock: Mutex<AutoLockMonitor>,
+    pub clipboard: SecretClipboard,
 }
 
 impl AppVault {
@@ -34,6 +36,7 @@ impl AppVault {
                 AutoLockPolicy::default(),
                 current_unix_millis(),
             )),
+            clipboard: SecretClipboard::default(),
         })
     }
 }

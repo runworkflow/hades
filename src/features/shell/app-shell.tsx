@@ -2,11 +2,11 @@ import { useState } from "react"
 import { SidebarMinimalisticIcon } from "@solar-icons/react/linear"
 
 import { IconButton } from "@/components/icon-button"
-import { ItemsView } from "@/features/items/items-view"
-import { selectItemsForView } from "@/features/items/select-items"
+import { ItemsWorkspace } from "@/features/items/items-workspace"
+import { useItems } from "@/features/items/use-items"
 import { useNavigationHistory } from "@/features/navigation/use-navigation-history"
 import { recentViewId } from "@/features/navigation/view-ids"
-import { sampleFolders, sampleItems } from "@/features/vault/sample-vault"
+import { useFolders } from "@/features/folders/use-folders"
 import { useActivityReporter } from "@/features/vault/use-activity-reporter"
 import { useLockVault } from "@/features/vault/use-vault"
 
@@ -18,8 +18,10 @@ export function AppShell() {
   const navigation = useNavigationHistory(recentViewId)
   const lockVault = useLockVault()
   useActivityReporter()
+  const folders = useFolders().data ?? []
+  const items = useItems().data ?? []
 
-  const activeFolder = sampleFolders.find(
+  const activeFolder = folders.find(
     (folder) => folder.id === navigation.current
   )
   const title = activeFolder?.name ?? "Recent Items"
@@ -45,26 +47,29 @@ export function AppShell() {
       </IconButton>
       <Sidebar
         isOpen={isSidebarOpen}
-        folders={sampleFolders}
+        folders={folders}
         activeViewId={navigation.current}
         onSelectView={navigation.goTo}
         onLock={() => lockVault.mutate()}
       />
       <main
-        className={`mt-2 mr-2 mb-2 flex min-w-0 flex-col overflow-hidden rounded-pane bg-pane transition-[margin] duration-300 ease-out ${paneMarginClass}`}
+        className={`mt-2 mr-2 mb-2 flex min-w-0 overflow-hidden rounded-pane bg-pane transition-[margin] duration-300 ease-out ${paneMarginClass}`}
       >
-        <PaneHeader
-          isSidebarOpen={isSidebarOpen}
-          canGoBack={navigation.canGoBack}
-          canGoForward={navigation.canGoForward}
-          onGoBack={navigation.goBack}
-          onGoForward={navigation.goForward}
-        />
-        <ItemsView
+        <ItemsWorkspace
           key={navigation.current}
+          header={
+            <PaneHeader
+              isSidebarOpen={isSidebarOpen}
+              canGoBack={navigation.canGoBack}
+              canGoForward={navigation.canGoForward}
+              onGoBack={navigation.goBack}
+              onGoForward={navigation.goForward}
+            />
+          }
           title={title}
-          items={selectItemsForView(sampleItems, navigation.current)}
-          folders={sampleFolders}
+          viewId={navigation.current}
+          folders={folders}
+          items={items}
         />
       </main>
     </div>

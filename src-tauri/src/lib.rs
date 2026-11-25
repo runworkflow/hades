@@ -2,6 +2,9 @@ mod app_vault;
 mod auto_lock_runner;
 mod clock;
 mod command_error;
+mod folder_commands;
+mod item_commands;
+mod secret_clipboard;
 mod vault_commands;
 
 use tauri::Manager;
@@ -24,6 +27,15 @@ pub fn run() {
             vault_commands::unlock_with_recovery_key,
             vault_commands::lock_vault,
             vault_commands::report_activity,
+            folder_commands::list_folders,
+            folder_commands::create_folder,
+            item_commands::list_items,
+            item_commands::get_item,
+            item_commands::create_item,
+            item_commands::reveal_item_field,
+            item_commands::copy_item_field,
+            item_commands::update_item,
+            item_commands::delete_item,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

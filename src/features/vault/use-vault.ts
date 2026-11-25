@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import type { CommandError } from "@/lib/call-command"
 
+import { clearUnlockedData } from "./clear-unlocked-data"
 import { vaultApi } from "./vault-api"
 
 export const vaultStatusQueryKey = ["vault", "status"] as const
@@ -41,5 +42,13 @@ export function useUnlockWithRecoveryKey() {
 }
 
 export function useLockVault() {
-  return useVaultMutation(vaultApi.lock)
+  const queryClient = useQueryClient()
+
+  return useMutation<void, CommandError, void>({
+    mutationFn: vaultApi.lock,
+    onSuccess: () => {
+      clearUnlockedData(queryClient)
+      return queryClient.invalidateQueries({ queryKey: vaultStatusQueryKey })
+    },
+  })
 }

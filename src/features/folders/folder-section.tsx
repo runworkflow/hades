@@ -1,10 +1,12 @@
+import { useState } from "react"
 import { AddIcon } from "@solar-icons/react/linear"
 
 import { IconButton } from "@/components/icon-button"
 import { SidebarNavItem } from "@/features/shell/sidebar-nav-item"
 
-import { folderIcons } from "./folder-icons"
+import { getFolderIcon } from "./folder-icons"
 import type { Folder } from "./folder-types"
+import { NewFolderDialog } from "./new-folder-dialog"
 
 type FolderSectionProps = {
   folders: Folder[]
@@ -17,11 +19,13 @@ export function FolderSection({
   activeViewId,
   onSelectFolder,
 }: FolderSectionProps) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+
   return (
     <>
       <div className="flex items-center justify-between pt-4 pr-2 pb-2 pl-3.5 font-semibold">
         <span>Folders</span>
-        <IconButton label="New folder">
+        <IconButton label="New folder" onClick={() => setIsDialogOpen(true)}>
           <AddIcon size={18} />
         </IconButton>
       </div>
@@ -29,13 +33,18 @@ export function FolderSection({
         {folders.map((folder) => (
           <SidebarNavItem
             key={folder.id}
-            icon={folderIcons[folder.iconName]}
+            icon={getFolderIcon(folder.iconName)}
             label={folder.name}
             isActive={folder.id === activeViewId}
             onSelect={() => onSelectFolder(folder.id)}
           />
         ))}
       </nav>
+      <NewFolderDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        onCreated={(folder) => onSelectFolder(folder.id)}
+      />
     </>
   )
 }
