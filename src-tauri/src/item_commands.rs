@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::time::Duration;
 
-use hades_core::{ItemDetail, ItemField, ItemKind, ItemSummary, NewItem, VaultError};
+use hades_core::{ItemDetail, ItemField, ItemKind, ItemSummary, ItemUpdate, NewItem, VaultError};
 use serde::Serialize;
 use tauri::State;
 
@@ -105,6 +105,29 @@ pub fn create_item(
     };
     let summary = lock_session(&vault)?.create_item(new_item, current_unix_millis())?;
     Ok(summary.into())
+}
+
+#[tauri::command(async)]
+pub fn update_item(
+    vault: State<'_, AppVault>,
+    item_id: String,
+    folder_id: String,
+    name: String,
+    fields: HashMap<String, String>,
+) -> Result<ItemSummaryResponse, CommandError> {
+    let update = ItemUpdate {
+        folder_id,
+        name,
+        fields: fields.into_iter().collect(),
+    };
+    let summary = lock_session(&vault)?.update_item(&item_id, update, current_unix_millis())?;
+    Ok(summary.into())
+}
+
+#[tauri::command(async)]
+pub fn delete_item(vault: State<'_, AppVault>, item_id: String) -> Result<(), CommandError> {
+    lock_session(&vault)?.delete_item(&item_id, current_unix_millis())?;
+    Ok(())
 }
 
 #[tauri::command(async)]

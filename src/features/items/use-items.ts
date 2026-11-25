@@ -4,7 +4,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import type { CommandError } from "@/lib/call-command"
 
 import { itemApi } from "./item-api"
-import type { ItemDetail, NewItemInput, VaultItem } from "./item-types"
+import type {
+  ItemDetail,
+  NewItemInput,
+  UpdateItemInput,
+  VaultItem,
+} from "./item-types"
 
 const itemsQueryKey = ["items"] as const
 const copyHintDurationMs = 30_000
@@ -55,4 +60,29 @@ export function useCopyField(itemId: string, key: string) {
   }, [isSuccess, reset])
 
   return mutation
+}
+
+export function useUpdateItem(itemId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation<VaultItem, CommandError, UpdateItemInput>({
+    mutationFn: (input) => itemApi.update(itemId, input),
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: itemsQueryKey }),
+        queryClient.invalidateQueries({ queryKey: ["item", itemId] }),
+      ]),
+  })
+}
+
+export function useDeleteItem(itemId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation<void, CommandError, void>({
+    mutationFn: () => itemApi.remove(itemId),
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey: ["item", itemId] })
+      return queryClient.invalidateQueries({ queryKey: itemsQueryKey })
+    },
+  })
 }

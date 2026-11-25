@@ -12,7 +12,8 @@ mod vault;
 pub use error::{CryptoError, CryptoResult};
 pub use folders::{Folder, MAX_FOLDER_NAME_LENGTH, MAX_ICON_NAME_LENGTH};
 pub use items::{
-    ItemDetail, ItemField, ItemKind, ItemSummary, MAX_FIELD_LENGTH, MAX_ITEM_NAME_LENGTH, NewItem,
+    ItemDetail, ItemField, ItemKind, ItemSummary, ItemUpdate, MAX_FIELD_LENGTH,
+    MAX_ITEM_NAME_LENGTH, NewItem,
 };
 pub use key_derivation::{KdfParams, SALT_LENGTH, Salt, derive_key};
 pub use key_wrapping::{WrappedKey, unwrap_key, wrap_key};

@@ -39,6 +39,13 @@ pub struct NewItem {
     pub fields: BTreeMap<String, String>,
 }
 
+#[derive(Debug, Clone)]
+pub struct ItemUpdate {
+    pub folder_id: String,
+    pub name: String,
+    pub fields: BTreeMap<String, String>,
+}
+
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(super) struct ItemData {

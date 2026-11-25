@@ -4,11 +4,10 @@ import { FormError } from "@/components/form-error"
 import { Modal } from "@/components/modal"
 import { PrimaryButton } from "@/components/primary-button"
 import { SelectField } from "@/components/select-field"
-import { TextAreaField } from "@/components/text-area-field"
 import { TextField } from "@/components/text-field"
 import type { Folder } from "@/features/folders/folder-types"
 
-import { itemFieldSpecs } from "./item-field-specs"
+import { ItemFieldsInputs } from "./item-fields-inputs"
 import { ItemKindPicker } from "./item-kind-picker"
 import type { CreatableItemKind, VaultItem } from "./item-types"
 import { useCreateItem } from "./use-items"
@@ -74,27 +73,7 @@ function NewItemForm({
           label: folder.name,
         }))}
       />
-      {itemFieldSpecs[kind].map((spec) => {
-        const fieldKey = `${kind}-${spec.key}`
-        const value = fields[spec.key] ?? ""
-        return spec.isMultiline ? (
-          <TextAreaField
-            key={fieldKey}
-            label={spec.label}
-            value={value}
-            onChange={(event) => setField(spec.key, event.target.value)}
-          />
-        ) : (
-          <TextField
-            key={fieldKey}
-            label={spec.label}
-            type={spec.isSecret ? "password" : "text"}
-            autoComplete="off"
-            value={value}
-            onChange={(event) => setField(spec.key, event.target.value)}
-          />
-        )
-      })}
+      <ItemFieldsInputs kind={kind} values={fields} onChange={setField} />
       <FormError message={createItem.error?.message} />
       <div className="mt-2 flex gap-3">
         <button

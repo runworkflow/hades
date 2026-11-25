@@ -34,6 +34,8 @@ pub fn run() {
             item_commands::create_item,
             item_commands::reveal_item_field,
             item_commands::copy_item_field,
+            item_commands::update_item,
+            item_commands::delete_item,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

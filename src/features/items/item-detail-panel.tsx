@@ -1,9 +1,17 @@
-import { CloseCircleIcon } from "@solar-icons/react/linear"
+import { useState } from "react"
+import {
+  CloseCircleIcon,
+  PenIcon,
+  TrashBinTrashIcon,
+} from "@solar-icons/react/linear"
 
 import { FormError } from "@/components/form-error"
 import { IconButton } from "@/components/icon-button"
+import type { Folder } from "@/features/folders/folder-types"
 import { formatRelativeTime } from "@/lib/format-relative-time"
 
+import { DeleteItemDialog } from "./delete-item-dialog"
+import { EditItemDialog } from "./edit-item-dialog"
 import { ItemFieldRow } from "./item-field-row"
 import { itemKinds } from "./item-kinds"
 import type { ItemDetail } from "./item-types"
@@ -11,17 +19,21 @@ import { useItemDetail } from "./use-items"
 
 type ItemDetailContentProps = {
   detail: ItemDetail
-  folderName: string
+  folders: Folder[]
   onClose: () => void
 }
 
 function ItemDetailContent({
   detail,
-  folderName,
+  folders,
   onClose,
 }: ItemDetailContentProps) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const kind = itemKinds[detail.kind]
   const KindIcon = kind.icon
+  const folderName =
+    folders.find((folder) => folder.id === detail.folderId)?.name ?? ""
 
   return (
     <>
@@ -35,6 +47,14 @@ function ItemDetailContent({
           <h2 className="truncate text-lg font-semibold">{detail.name}</h2>
           <span className="text-sm text-ink-muted">{kind.label}</span>
         </div>
+        {detail.kind !== "file" && (
+          <IconButton label="Edit item" onClick={() => setIsEditing(true)}>
+            <PenIcon size={18} />
+          </IconButton>
+        )}
+        <IconButton label="Delete item" onClick={() => setIsDeleting(true)}>
+          <TrashBinTrashIcon size={18} />
+        </IconButton>
         <IconButton label="Close details" onClick={onClose}>
           <CloseCircleIcon size={20} />
         </IconButton>
@@ -63,19 +83,35 @@ function ItemDetailContent({
           <dd>{formatRelativeTime(detail.modifiedAt)}</dd>
         </div>
       </dl>
+      {detail.kind !== "file" && (
+        <EditItemDialog
+          isOpen={isEditing}
+          detail={detail}
+          kind={detail.kind}
+          folders={folders}
+          onClose={() => setIsEditing(false)}
+        />
+      )}
+      <DeleteItemDialog
+        isOpen={isDeleting}
+        itemId={detail.id}
+        itemName={detail.name}
+        onClose={() => setIsDeleting(false)}
+        onDeleted={onClose}
+      />
     </>
   )
 }
 
 type ItemDetailPanelProps = {
   itemId: string
-  folderName: string
+  folders: Folder[]
   onClose: () => void
 }
 
 export function ItemDetailPanel({
   itemId,
-  folderName,
+  folders,
   onClose,
 }: ItemDetailPanelProps) {
   const detail = useItemDetail(itemId)
@@ -85,7 +121,7 @@ export function ItemDetailPanel({
       {detail.data && (
         <ItemDetailContent
           detail={detail.data}
-          folderName={folderName}
+          folders={folders}
           onClose={onClose}
         />
       )}

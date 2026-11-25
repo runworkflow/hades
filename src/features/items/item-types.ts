@@ -21,6 +21,12 @@ export type ItemDetail = VaultItem & {
   fields: ItemFieldView[]
 }
 
+export type UpdateItemInput = {
+  folderId: string
+  name: string
+  fields: Record<string, string>
+}
+
 export type NewItemInput = {
   folderId: string
   kind: CreatableItemKind

@@ -18,6 +18,8 @@
     "allow-get-item",
     "allow-create-item",
     "allow-reveal-item-field",
-    "allow-copy-item-field"
+    "allow-copy-item-field",
+    "allow-update-item",
+    "allow-delete-item"
   ]
 }

@@ -26,9 +26,6 @@ export function ItemsWorkspace({
   const [openItemId, setOpenItemId] = useState<string | null>(null)
   const [isNewItemOpen, setIsNewItemOpen] = useState(false)
 
-  const openItem = items.find((item) => item.id === openItemId)
-  const openItemFolderName =
-    folders.find((folder) => folder.id === openItem?.folderId)?.name ?? ""
   const currentFolderId = folders.some((folder) => folder.id === viewId)
     ? viewId
     : null
@@ -50,7 +47,7 @@ export function ItemsWorkspace({
         <ItemDetailPanel
           key={openItemId}
           itemId={openItemId}
-          folderName={openItemFolderName}
+          folders={folders}
           onClose={() => setOpenItemId(null)}
         />
       )}

@@ -151,14 +151,14 @@ fn read_field<S: Store>(
         .unwrap_or_else(|| Zeroizing::new(String::new())))
 }
 
-fn check_folder_exists<S: Store>(store: &S, folder_id: &str) -> VaultResult<()> {
+pub(super) fn check_folder_exists<S: Store>(store: &S, folder_id: &str) -> VaultResult<()> {
     match store.get_envelope(folder_id)? {
         Some(envelope) if envelope.kind == EnvelopeKind::Folder && !envelope.is_deleted => Ok(()),
         _ => Err(VaultError::FolderNotFound),
     }
 }
 
-fn find_item_envelope<S: Store>(store: &S, id: &str) -> VaultResult<Envelope> {
+pub(super) fn find_item_envelope<S: Store>(store: &S, id: &str) -> VaultResult<Envelope> {
     match store.get_envelope(id)? {
         Some(envelope) if envelope.kind == EnvelopeKind::Item && !envelope.is_deleted => {
             Ok(envelope)
@@ -167,26 +167,33 @@ fn find_item_envelope<S: Store>(store: &S, id: &str) -> VaultResult<Envelope> {
     }
 }
 
+pub(super) fn check_fields(kind: ItemKind, fields: &BTreeMap<String, String>) -> VaultResult<()> {
+    for (key, value) in fields {
+        if kind.field(key).is_none() || value.chars().count() > MAX_FIELD_LENGTH {
+            return Err(VaultError::InvalidField);
+        }
+    }
+    Ok(())
+}
+
 fn clean_fields(
     kind: ItemKind,
     fields: BTreeMap<String, String>,
 ) -> VaultResult<BTreeMap<String, Zeroizing<String>>> {
+    check_fields(kind, &fields)?;
+
     let mut cleaned: BTreeMap<String, Zeroizing<String>> = kind
         .fields()
         .iter()
         .map(|spec| (spec.key.to_string(), Zeroizing::new(String::new())))
         .collect();
-
     for (key, value) in fields {
-        if kind.field(&key).is_none() || value.chars().count() > MAX_FIELD_LENGTH {
-            return Err(VaultError::InvalidField);
-        }
         cleaned.insert(key, Zeroizing::new(value));
     }
     Ok(cleaned)
 }
 
-fn read_data(vault: &UnlockedVault, envelope: &Envelope) -> VaultResult<ItemData> {
+pub(super) fn read_data(vault: &UnlockedVault, envelope: &Envelope) -> VaultResult<ItemData> {
     let plaintext = open_record(vault.vault_key(), envelope)?;
     serde_json::from_slice(&plaintext).map_err(|_| VaultError::Store(StoreError::CorruptRecord))
 }
