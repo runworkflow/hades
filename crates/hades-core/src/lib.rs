@@ -1,3 +1,4 @@
+mod blobs;
 mod error;
 mod folders;
 mod items;
@@ -9,6 +10,9 @@ mod secret_key;
 mod store;
 mod vault;
 
+pub use blobs::{
+    BlobError, BlobResult, CHUNK_SIZE, FileBlobStore, MAX_FILE_SIZE, decrypt_stream, encrypt_stream,
+};
 pub use error::{CryptoError, CryptoResult};
 pub use folders::{Folder, MAX_FOLDER_NAME_LENGTH, MAX_ICON_NAME_LENGTH};
 pub use items::{
