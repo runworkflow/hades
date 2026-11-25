@@ -3,5 +3,14 @@
   "identifier": "default",
   "description": "Capability for the main window",
   "windows": ["main"],
-  "permissions": ["core:default", "core:window:allow-start-dragging"]
+  "permissions": [
+    "core:default",
+    "core:window:allow-start-dragging",
+    "allow-get-vault-status",
+    "allow-create-vault",
+    "allow-unlock-with-password",
+    "allow-unlock-with-recovery-key",
+    "allow-lock-vault",
+    "allow-report-activity"
+  ]
 }
