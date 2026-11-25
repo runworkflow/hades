@@ -1,12 +1,15 @@
 mod error;
+mod folders;
 mod key_derivation;
 mod key_wrapping;
+mod records;
 mod sealed;
 mod secret_key;
 mod store;
 mod vault;
 
 pub use error::{CryptoError, CryptoResult};
+pub use folders::{Folder, MAX_FOLDER_NAME_LENGTH, MAX_ICON_NAME_LENGTH};
 pub use key_derivation::{KdfParams, SALT_LENGTH, Salt, derive_key};
 pub use key_wrapping::{WrappedKey, unwrap_key, wrap_key};
 pub use sealed::{NONCE_LENGTH, Sealed, open, seal};

@@ -6,7 +6,8 @@ import { ItemsView } from "@/features/items/items-view"
 import { selectItemsForView } from "@/features/items/select-items"
 import { useNavigationHistory } from "@/features/navigation/use-navigation-history"
 import { recentViewId } from "@/features/navigation/view-ids"
-import { sampleFolders, sampleItems } from "@/features/vault/sample-vault"
+import { useFolders } from "@/features/folders/use-folders"
+import type { VaultItem } from "@/features/items/item-types"
 import { useActivityReporter } from "@/features/vault/use-activity-reporter"
 import { useLockVault } from "@/features/vault/use-vault"
 
@@ -18,8 +19,10 @@ export function AppShell() {
   const navigation = useNavigationHistory(recentViewId)
   const lockVault = useLockVault()
   useActivityReporter()
+  const folders = useFolders().data ?? []
+  const items: VaultItem[] = []
 
-  const activeFolder = sampleFolders.find(
+  const activeFolder = folders.find(
     (folder) => folder.id === navigation.current
   )
   const title = activeFolder?.name ?? "Recent Items"
@@ -45,7 +48,7 @@ export function AppShell() {
       </IconButton>
       <Sidebar
         isOpen={isSidebarOpen}
-        folders={sampleFolders}
+        folders={folders}
         activeViewId={navigation.current}
         onSelectView={navigation.goTo}
         onLock={() => lockVault.mutate()}
@@ -63,8 +66,8 @@ export function AppShell() {
         <ItemsView
           key={navigation.current}
           title={title}
-          items={selectItemsForView(sampleItems, navigation.current)}
-          folders={sampleFolders}
+          items={selectItemsForView(items, navigation.current)}
+          folders={folders}
         />
       </main>
     </div>

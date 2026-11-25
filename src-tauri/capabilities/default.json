@@ -11,6 +11,8 @@
     "allow-unlock-with-password",
     "allow-unlock-with-recovery-key",
     "allow-lock-vault",
-    "allow-report-activity"
+    "allow-report-activity",
+    "allow-list-folders",
+    "allow-create-folder"
   ]
 }

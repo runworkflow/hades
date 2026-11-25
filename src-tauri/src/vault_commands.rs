@@ -33,7 +33,7 @@ pub struct CreatedVault {
     recovery_key: String,
 }
 
-fn lock_session(
+pub fn lock_session(
     vault: &AppVault,
 ) -> Result<MutexGuard<'_, VaultSession<SqliteStore>>, CommandError> {
     vault.session.lock().map_err(|_| CommandError::internal())

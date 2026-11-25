@@ -17,6 +17,12 @@ pub enum VaultError {
     InvalidRecoveryKey,
     #[error("incorrect recovery key")]
     IncorrectRecoveryKey,
+    #[error("the vault is locked")]
+    VaultLocked,
+    #[error("the name must be between 1 and {maximum_length} characters")]
+    InvalidName { maximum_length: usize },
+    #[error("the icon name is not valid")]
+    InvalidIcon,
     #[error(transparent)]
     Crypto(#[from] CryptoError),
     #[error(transparent)]
