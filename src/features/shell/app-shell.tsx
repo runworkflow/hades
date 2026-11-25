@@ -7,6 +7,7 @@ import { selectItemsForView } from "@/features/items/select-items"
 import { useNavigationHistory } from "@/features/navigation/use-navigation-history"
 import { recentViewId } from "@/features/navigation/view-ids"
 import { sampleFolders, sampleItems } from "@/features/vault/sample-vault"
+import { useLockVault } from "@/features/vault/use-vault"
 
 import { PaneHeader } from "./pane-header"
 import { Sidebar } from "./sidebar"
@@ -14,6 +15,7 @@ import { Sidebar } from "./sidebar"
 export function AppShell() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const navigation = useNavigationHistory(recentViewId)
+  const lockVault = useLockVault()
 
   const activeFolder = sampleFolders.find(
     (folder) => folder.id === navigation.current
@@ -44,6 +46,7 @@ export function AppShell() {
         folders={sampleFolders}
         activeViewId={navigation.current}
         onSelectView={navigation.goTo}
+        onLock={() => lockVault.mutate()}
       />
       <main
         className={`mt-2 mr-2 mb-2 flex min-w-0 flex-col overflow-hidden rounded-pane bg-pane transition-[margin] duration-300 ease-out ${paneMarginClass}`}

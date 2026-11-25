@@ -1,5 +1,12 @@
-import { AppShell } from "@/features/shell/app-shell"
+import { QueryClientProvider } from "@tanstack/react-query"
+
+import { queryClient } from "@/lib/query-client"
+import { VaultGate } from "@/features/vault/vault-gate"
 
 export function App() {
-  return <AppShell />
+  return (
+    <QueryClientProvider client={queryClient}>
+      <VaultGate />
+    </QueryClientProvider>
+  )
 }
