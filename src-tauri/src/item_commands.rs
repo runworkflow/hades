@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::time::Duration;
 
 use hades_core::{ItemDetail, ItemField, ItemKind, ItemSummary, NewItem, VaultError};
 use serde::Serialize;
@@ -8,6 +9,8 @@ use crate::app_vault::AppVault;
 use crate::clock::current_unix_millis;
 use crate::command_error::CommandError;
 use crate::vault_commands::lock_session;
+
+const CLIPBOARD_CLEAR_AFTER: Duration = Duration::from_secs(30);
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -102,6 +105,19 @@ pub fn create_item(
     };
     let summary = lock_session(&vault)?.create_item(new_item, current_unix_millis())?;
     Ok(summary.into())
+}
+
+#[tauri::command(async)]
+pub fn copy_item_field(
+    vault: State<'_, AppVault>,
+    item_id: String,
+    key: String,
+) -> Result<(), CommandError> {
+    let value = lock_session(&vault)?.read_item_field(&item_id, &key)?;
+    vault
+        .clipboard
+        .copy(value, CLIPBOARD_CLEAR_AFTER)
+        .map_err(|_| CommandError::internal())
 }
 
 #[tauri::command(async)]

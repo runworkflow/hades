@@ -88,6 +88,7 @@ pub fn unlock_with_recovery_key(
 #[tauri::command(async)]
 pub fn lock_vault(vault: State<'_, AppVault>) -> Result<(), CommandError> {
     lock_session(&vault)?.lock();
+    vault.clipboard.clear_now();
     Ok(())
 }
 

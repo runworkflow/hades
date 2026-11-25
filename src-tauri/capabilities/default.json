@@ -17,6 +17,7 @@
     "allow-list-items",
     "allow-get-item",
     "allow-create-item",
-    "allow-reveal-item-field"
+    "allow-reveal-item-field",
+    "allow-copy-item-field"
   ]
 }

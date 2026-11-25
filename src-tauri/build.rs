@@ -11,6 +11,7 @@ const APP_COMMANDS: &[&str] = &[
     "get_item",
     "create_item",
     "reveal_item_field",
+    "copy_item_field",
 ];
 
 fn main() {

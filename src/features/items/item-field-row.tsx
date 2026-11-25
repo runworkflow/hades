@@ -1,11 +1,16 @@
-import { EyeClosedIcon, EyeIcon } from "@solar-icons/react/linear"
+import {
+  CheckCircleIcon,
+  CopyIcon,
+  EyeClosedIcon,
+  EyeIcon,
+} from "@solar-icons/react/linear"
 
 import { FormError } from "@/components/form-error"
 import { IconButton } from "@/components/icon-button"
 
 import { getFieldSpec } from "./item-field-specs"
 import type { ItemFieldView, ItemKind } from "./item-types"
-import { useRevealField } from "./use-items"
+import { useCopyField, useRevealField } from "./use-items"
 
 const maskedValue = "••••••••••"
 
@@ -15,73 +20,59 @@ type ItemFieldRowProps = {
   field: ItemFieldView
 }
 
-function EmptyValue() {
-  return <span className="text-ink-muted">Not set</span>
-}
-
-function PlainValue({ value }: { value: string }) {
-  if (!value) return <EmptyValue />
-  return <span className="break-words select-text">{value}</span>
-}
-
-function SecretValue({ itemId, field, isMultiline }: SecretValueProps) {
-  const reveal = useRevealField(itemId, field.key)
-  const revealedValue = reveal.data
-
-  if (!field.hasValue) return <EmptyValue />
-
-  return (
-    <>
-      <div className="flex items-start gap-2">
-        <span
-          className={`min-w-0 flex-1 break-all whitespace-pre-wrap select-text ${
-            isMultiline && revealedValue !== undefined
-              ? "font-mono text-sm"
-              : ""
-          }`}
-        >
-          {revealedValue ?? maskedValue}
-        </span>
-        <IconButton
-          label={revealedValue === undefined ? "Reveal" : "Hide"}
-          onClick={() =>
-            revealedValue === undefined ? reveal.mutate() : reveal.reset()
-          }
-        >
-          {revealedValue === undefined ? (
-            <EyeIcon size={18} />
-          ) : (
-            <EyeClosedIcon size={18} />
-          )}
-        </IconButton>
-      </div>
-      <FormError message={reveal.error?.message} />
-    </>
-  )
-}
-
-type SecretValueProps = {
-  itemId: string
-  field: ItemFieldView
-  isMultiline: boolean
-}
-
 export function ItemFieldRow({ itemId, kind, field }: ItemFieldRowProps) {
   const spec = getFieldSpec(kind, field.key)
+  const reveal = useRevealField(itemId, field.key)
+  const copy = useCopyField(itemId, field.key)
+
+  const revealedValue = reveal.data
+  const isHidden = field.isSecret && revealedValue === undefined
+  const displayValue = field.isSecret
+    ? (revealedValue ?? maskedValue)
+    : (field.value ?? "")
+  const textClasses = spec?.isMultiline && !isHidden ? "font-mono text-sm" : ""
+  const errorMessage = reveal.error?.message ?? copy.error?.message
 
   return (
     <div className="flex flex-col gap-1.5 rounded-xl bg-raised px-4 py-3">
       <span className="text-xs tracking-wide text-ink-muted uppercase">
         {spec?.label ?? field.key}
       </span>
-      {field.isSecret ? (
-        <SecretValue
-          itemId={itemId}
-          field={field}
-          isMultiline={spec?.isMultiline ?? false}
-        />
-      ) : (
-        <PlainValue value={field.value ?? ""} />
+      <div className="flex items-start gap-1">
+        {field.hasValue ? (
+          <span
+            className={`min-w-0 flex-1 break-all whitespace-pre-wrap select-text ${textClasses}`}
+          >
+            {displayValue}
+          </span>
+        ) : (
+          <span className="flex-1 text-ink-muted">Not set</span>
+        )}
+        {field.hasValue && (
+          <div className="flex shrink-0">
+            {field.isSecret && (
+              <IconButton
+                label={isHidden ? "Reveal" : "Hide"}
+                onClick={() => (isHidden ? reveal.mutate() : reveal.reset())}
+              >
+                {isHidden ? <EyeIcon size={18} /> : <EyeClosedIcon size={18} />}
+              </IconButton>
+            )}
+            <IconButton label="Copy" onClick={() => copy.mutate()}>
+              {copy.isSuccess ? (
+                <CheckCircleIcon size={18} />
+              ) : (
+                <CopyIcon size={18} />
+              )}
+            </IconButton>
+          </div>
+        )}
+      </div>
+      <FormError message={errorMessage} />
+      {copy.isSuccess && (
+        <span className="text-xs text-ink-muted">
+          Copied. The clipboard clears in 30 seconds.
+        </span>
       )}
     </div>
   )

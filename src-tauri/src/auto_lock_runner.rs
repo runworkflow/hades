@@ -38,5 +38,6 @@ fn lock_if_unlocked(app: &AppHandle, vault: &AppVault, reason: LockReason) {
     }
     session.lock();
     drop(session);
+    vault.clipboard.clear_now();
     let _ = app.emit(VAULT_LOCKED_EVENT, reason.as_str());
 }

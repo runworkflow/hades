@@ -4,6 +4,7 @@ mod clock;
 mod command_error;
 mod folder_commands;
 mod item_commands;
+mod secret_clipboard;
 mod vault_commands;
 
 use tauri::Manager;
@@ -32,6 +33,7 @@ pub fn run() {
             item_commands::get_item,
             item_commands::create_item,
             item_commands::reveal_item_field,
+            item_commands::copy_item_field,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

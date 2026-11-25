@@ -118,11 +118,30 @@ pub fn reveal_item_field<S: Store>(
     id: &str,
     key: &str,
 ) -> VaultResult<Zeroizing<String>> {
+    read_field(store, vault, id, key, true)
+}
+
+pub fn read_item_field<S: Store>(
+    store: &S,
+    vault: &UnlockedVault,
+    id: &str,
+    key: &str,
+) -> VaultResult<Zeroizing<String>> {
+    read_field(store, vault, id, key, false)
+}
+
+fn read_field<S: Store>(
+    store: &S,
+    vault: &UnlockedVault,
+    id: &str,
+    key: &str,
+    only_secret: bool,
+) -> VaultResult<Zeroizing<String>> {
     let envelope = find_item_envelope(store, id)?;
     let data = read_data(vault, &envelope)?;
 
     let spec = data.kind.field(key).ok_or(VaultError::InvalidField)?;
-    if !spec.is_secret {
+    if only_secret && !spec.is_secret {
         return Err(VaultError::InvalidField);
     }
     Ok(data

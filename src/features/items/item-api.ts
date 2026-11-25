@@ -9,4 +9,6 @@ export const itemApi = {
     callCommand<VaultItem>("create_item", { ...input }),
   revealField: (itemId: string, key: string) =>
     callCommand<string>("reveal_item_field", { itemId, key }),
+  copyField: (itemId: string, key: string) =>
+    callCommand<void>("copy_item_field", { itemId, key }),
 }

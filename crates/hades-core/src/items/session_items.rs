@@ -4,7 +4,7 @@ use crate::store::Store;
 use crate::vault::{VaultError, VaultResult, VaultSession};
 
 use super::item::{ItemDetail, ItemSummary, NewItem};
-use super::item_service::{create_item, get_item, list_items, reveal_item_field};
+use super::item_service::{create_item, get_item, list_items, read_item_field, reveal_item_field};
 
 impl<S: Store> VaultSession<S> {
     pub fn create_item(&self, new_item: NewItem, now_ms: i64) -> VaultResult<ItemSummary> {
@@ -25,5 +25,10 @@ impl<S: Store> VaultSession<S> {
     pub fn reveal_item_field(&self, id: &str, key: &str) -> VaultResult<Zeroizing<String>> {
         let vault = self.unlocked_vault().ok_or(VaultError::VaultLocked)?;
         reveal_item_field(self.store(), vault, id, key)
+    }
+
+    pub fn read_item_field(&self, id: &str, key: &str) -> VaultResult<Zeroizing<String>> {
+        let vault = self.unlocked_vault().ok_or(VaultError::VaultLocked)?;
+        read_item_field(self.store(), vault, id, key)
     }
 }
