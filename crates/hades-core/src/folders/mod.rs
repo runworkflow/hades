@@ -1,4 +1,5 @@
 mod folder;
+mod folder_changes;
 mod folder_service;
 mod session_folders;
 

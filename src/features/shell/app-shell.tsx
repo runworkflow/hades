@@ -18,12 +18,18 @@ export function AppShell() {
   const navigation = useNavigationHistory(recentViewId)
   const lockVault = useLockVault()
   useActivityReporter()
-  const folders = useFolders().data ?? []
+  const foldersQuery = useFolders()
+  const folders = foldersQuery.data ?? []
   const items = useItems().data ?? []
 
   const activeFolder = folders.find(
     (folder) => folder.id === navigation.current
   )
+  const isFolderMissing =
+    foldersQuery.isSuccess &&
+    navigation.current !== recentViewId &&
+    !activeFolder
+  const viewId = isFolderMissing ? recentViewId : navigation.current
   const title = activeFolder?.name ?? "Recent Items"
   const columnsClass = isSidebarOpen
     ? "grid-cols-[16.5rem_1fr]"
@@ -48,7 +54,7 @@ export function AppShell() {
       <Sidebar
         isOpen={isSidebarOpen}
         folders={folders}
-        activeViewId={navigation.current}
+        activeViewId={viewId}
         onSelectView={navigation.goTo}
         onLock={() => lockVault.mutate()}
       />
@@ -56,7 +62,7 @@ export function AppShell() {
         className={`mt-2 mr-2 mb-2 flex min-w-0 overflow-hidden rounded-pane bg-pane transition-[margin] duration-300 ease-out ${paneMarginClass}`}
       >
         <ItemsWorkspace
-          key={navigation.current}
+          key={viewId}
           header={
             <PaneHeader
               isSidebarOpen={isSidebarOpen}
@@ -67,9 +73,10 @@ export function AppShell() {
             />
           }
           title={title}
-          viewId={navigation.current}
+          viewId={viewId}
           folders={folders}
           items={items}
+          onFolderDeleted={() => navigation.goTo(recentViewId)}
         />
       </main>
     </div>

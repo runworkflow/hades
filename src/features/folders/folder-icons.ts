@@ -25,3 +25,7 @@ function isFolderIconName(value: string): value is FolderIconName {
 export function getFolderIcon(iconName: string) {
   return isFolderIconName(iconName) ? folderIcons[iconName] : folderIcons.folder
 }
+
+export function toFolderIconName(value: string): FolderIconName {
+  return isFolderIconName(value) ? value : "folder"
+}

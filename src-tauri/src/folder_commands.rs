@@ -40,3 +40,25 @@ pub fn create_folder(
     let folder = lock_session(&vault)?.create_folder(&name, &icon_name, current_unix_millis())?;
     Ok(folder.into())
 }
+
+#[tauri::command(async)]
+pub fn update_folder(
+    vault: State<'_, AppVault>,
+    folder_id: String,
+    name: String,
+    icon_name: String,
+) -> Result<FolderResponse, CommandError> {
+    let folder = lock_session(&vault)?.update_folder(
+        &folder_id,
+        &name,
+        &icon_name,
+        current_unix_millis(),
+    )?;
+    Ok(folder.into())
+}
+
+#[tauri::command(async)]
+pub fn delete_folder(vault: State<'_, AppVault>, folder_id: String) -> Result<(), CommandError> {
+    lock_session(&vault)?.delete_folder(&folder_id, current_unix_millis())?;
+    Ok(())
+}

@@ -29,6 +29,8 @@ pub fn run() {
             vault_commands::report_activity,
             folder_commands::list_folders,
             folder_commands::create_folder,
+            folder_commands::update_folder,
+            folder_commands::delete_folder,
             item_commands::list_items,
             item_commands::get_item,
             item_commands::create_item,
