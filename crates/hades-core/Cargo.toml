@@ -6,5 +6,6 @@ edition = "2024"
 [dependencies]
 argon2 = "0.6.0"
 chacha20poly1305 = { version = "0.11.0", features = ["zeroize"] }
+rusqlite = { version = "0.43.0", features = ["bundled"] }
 thiserror = "2.0.21"
 zeroize = { version = "1.9.2", features = ["derive"] }
