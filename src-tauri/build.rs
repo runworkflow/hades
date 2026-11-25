@@ -7,6 +7,10 @@ const APP_COMMANDS: &[&str] = &[
     "report_activity",
     "list_folders",
     "create_folder",
+    "list_items",
+    "get_item",
+    "create_item",
+    "reveal_item_field",
 ];
 
 fn main() {

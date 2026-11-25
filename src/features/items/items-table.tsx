@@ -10,9 +10,16 @@ import { itemsGridClass } from "./items-grid"
 type ItemsTableProps = {
   items: VaultItem[]
   folders: Folder[]
+  openItemId: string | null
+  onOpenItem: (itemId: string) => void
 }
 
-export function ItemsTable({ items, folders }: ItemsTableProps) {
+export function ItemsTable({
+  items,
+  folders,
+  openItemId,
+  onOpenItem,
+}: ItemsTableProps) {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
 
   const folderNameById = new Map(
@@ -59,7 +66,9 @@ export function ItemsTable({ items, folders }: ItemsTableProps) {
             item={item}
             folderName={folderNameById.get(item.folderId) ?? ""}
             isSelected={selectedIds.includes(item.id)}
+            isOpen={item.id === openItemId}
             onToggleSelected={() => toggleSelected(item.id)}
+            onOpen={() => onOpenItem(item.id)}
           />
         ))}
       </div>

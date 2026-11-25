@@ -3,6 +3,7 @@ mod auto_lock_runner;
 mod clock;
 mod command_error;
 mod folder_commands;
+mod item_commands;
 mod vault_commands;
 
 use tauri::Manager;
@@ -27,6 +28,10 @@ pub fn run() {
             vault_commands::report_activity,
             folder_commands::list_folders,
             folder_commands::create_folder,
+            item_commands::list_items,
+            item_commands::get_item,
+            item_commands::create_item,
+            item_commands::reveal_item_field,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

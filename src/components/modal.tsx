@@ -24,7 +24,7 @@ export function Modal({ isOpen, title, onClose, children }: ModalProps) {
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
-      className="m-auto w-full max-w-sm rounded-2xl border border-line bg-pane text-ink shadow-2xl backdrop:bg-black/60"
+      className="m-auto max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-2xl border border-line bg-pane text-ink shadow-2xl backdrop:bg-black/60"
     >
       {isOpen && (
         <div className="p-6">

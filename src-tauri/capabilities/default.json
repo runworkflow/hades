@@ -13,6 +13,10 @@
     "allow-lock-vault",
     "allow-report-activity",
     "allow-list-folders",
-    "allow-create-folder"
+    "allow-create-folder",
+    "allow-list-items",
+    "allow-get-item",
+    "allow-create-item",
+    "allow-reveal-item-field"
   ]
 }

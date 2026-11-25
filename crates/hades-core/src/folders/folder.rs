@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+use crate::records::clean_name;
 use crate::vault::{VaultError, VaultResult};
 
 pub const MAX_FOLDER_NAME_LENGTH: usize = 40;
@@ -21,14 +22,7 @@ pub(super) struct FolderData {
 }
 
 pub fn validate_folder_name(name: &str) -> VaultResult<String> {
-    let trimmed = name.trim();
-    let length = trimmed.chars().count();
-    if length == 0 || length > MAX_FOLDER_NAME_LENGTH || trimmed.chars().any(char::is_control) {
-        return Err(VaultError::InvalidName {
-            maximum_length: MAX_FOLDER_NAME_LENGTH,
-        });
-    }
-    Ok(trimmed.to_string())
+    clean_name(name, MAX_FOLDER_NAME_LENGTH)
 }
 
 pub fn validate_icon_name(icon: &str) -> VaultResult<String> {
