@@ -16,5 +16,5 @@ pub use store::{
 };
 pub use vault::{
     MINIMUM_PASSWORD_LENGTH, NewVault, RecoveryKey, UnlockedVault, VaultError, VaultResult,
-    create_vault, unlock_with_password, unlock_with_recovery_key,
+    VaultSession, VaultStatus, create_vault, unlock_with_password, unlock_with_recovery_key,
 };

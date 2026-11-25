@@ -13,10 +13,6 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 tauri = { version = "2", features = [] }
-
-[profile.release]
-codegen-units = 1
-lto = true
-opt-level = 3
-panic = "abort"
-strip = true
+hades-core = { path = "../crates/hades-core" }
+serde = { version = "1", features = ["derive"] }
+zeroize = "1"
