@@ -19,4 +19,8 @@ export const itemApi = {
   update: (itemId: string, input: UpdateItemInput) =>
     callCommand<VaultItem>("update_item", { itemId, ...input }),
   remove: (itemId: string) => callCommand<void>("delete_item", { itemId }),
+  removeMany: (itemIds: string[]) =>
+    callCommand<number>("delete_items", { itemIds }),
+  moveMany: (itemIds: string[], folderId: string) =>
+    callCommand<number>("move_items", { itemIds, folderId }),
 }

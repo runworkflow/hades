@@ -16,6 +16,8 @@ const APP_COMMANDS: &[&str] = &[
     "copy_item_field",
     "update_item",
     "delete_item",
+    "delete_items",
+    "move_items",
 ];
 
 fn main() {

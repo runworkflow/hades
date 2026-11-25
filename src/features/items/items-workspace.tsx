@@ -46,6 +46,9 @@ export function ItemsWorkspace({
           openItemId={openItemId}
           onOpenItem={setOpenItemId}
           onNewItem={() => setIsNewItemOpen(true)}
+          onItemsDeleted={(itemIds) => {
+            if (openItemId && itemIds.includes(openItemId)) setOpenItemId(null)
+          }}
           folderActions={
             currentFolder
               ? {

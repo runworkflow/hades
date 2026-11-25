@@ -1,4 +1,5 @@
 mod item;
+mod item_bulk;
 mod item_changes;
 mod item_kind;
 mod item_service;

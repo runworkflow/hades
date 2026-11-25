@@ -22,6 +22,8 @@
     "allow-reveal-item-field",
     "allow-copy-item-field",
     "allow-update-item",
-    "allow-delete-item"
+    "allow-delete-item",
+    "allow-delete-items",
+    "allow-move-items"
   ]
 }

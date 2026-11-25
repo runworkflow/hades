@@ -56,26 +56,39 @@ impl SqliteStore {
     }
 }
 
+fn upsert_envelope(connection: &Connection, envelope: &Envelope) -> StoreResult<()> {
+    let version = i64::try_from(envelope.version).map_err(|_| StoreError::CorruptRecord)?;
+    let changed_rows = connection.execute(
+        UPSERT_ENVELOPE,
+        params![
+            envelope.id,
+            envelope.kind.as_str(),
+            version,
+            envelope.is_deleted,
+            envelope.modified_at,
+            envelope.wrapped_key.0.nonce,
+            envelope.wrapped_key.0.ciphertext,
+            envelope.payload.nonce,
+            envelope.payload.ciphertext,
+        ],
+    )?;
+    if changed_rows == 0 {
+        return Err(StoreError::StaleVersion);
+    }
+    Ok(())
+}
+
 impl Store for SqliteStore {
     fn put_envelope(&self, envelope: &Envelope) -> StoreResult<()> {
-        let version = i64::try_from(envelope.version).map_err(|_| StoreError::CorruptRecord)?;
-        let changed_rows = self.connection.execute(
-            UPSERT_ENVELOPE,
-            params![
-                envelope.id,
-                envelope.kind.as_str(),
-                version,
-                envelope.is_deleted,
-                envelope.modified_at,
-                envelope.wrapped_key.0.nonce,
-                envelope.wrapped_key.0.ciphertext,
-                envelope.payload.nonce,
-                envelope.payload.ciphertext,
-            ],
-        )?;
-        if changed_rows == 0 {
-            return Err(StoreError::StaleVersion);
+        upsert_envelope(&self.connection, envelope)
+    }
+
+    fn put_envelopes(&self, envelopes: &[Envelope]) -> StoreResult<()> {
+        let transaction = self.connection.unchecked_transaction()?;
+        for envelope in envelopes {
+            upsert_envelope(&transaction, envelope)?;
         }
+        transaction.commit()?;
         Ok(())
     }
 

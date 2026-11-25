@@ -131,6 +131,23 @@ pub fn delete_item(vault: State<'_, AppVault>, item_id: String) -> Result<(), Co
 }
 
 #[tauri::command(async)]
+pub fn delete_items(
+    vault: State<'_, AppVault>,
+    item_ids: Vec<String>,
+) -> Result<usize, CommandError> {
+    Ok(lock_session(&vault)?.delete_items(&item_ids, current_unix_millis())?)
+}
+
+#[tauri::command(async)]
+pub fn move_items(
+    vault: State<'_, AppVault>,
+    item_ids: Vec<String>,
+    folder_id: String,
+) -> Result<usize, CommandError> {
+    Ok(lock_session(&vault)?.move_items(&item_ids, &folder_id, current_unix_millis())?)
+}
+
+#[tauri::command(async)]
 pub fn copy_item_field(
     vault: State<'_, AppVault>,
     item_id: String,

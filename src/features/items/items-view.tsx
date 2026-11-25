@@ -15,6 +15,7 @@ type ItemsViewProps = {
   openItemId: string | null
   onOpenItem: (itemId: string) => void
   onNewItem: () => void
+  onItemsDeleted: (itemIds: string[]) => void
   folderActions: FolderActions | null
 }
 
@@ -25,6 +26,7 @@ export function ItemsView({
   openItemId,
   onOpenItem,
   onNewItem,
+  onItemsDeleted,
   folderActions,
 }: ItemsViewProps) {
   const [searchText, setSearchText] = useState("")
@@ -48,6 +50,7 @@ export function ItemsView({
           folders={folders}
           openItemId={openItemId}
           onOpenItem={onOpenItem}
+          onItemsDeleted={onItemsDeleted}
         />
       ) : (
         <p className="py-20 text-center text-ink-muted">No activity yet.</p>
