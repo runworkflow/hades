@@ -1389,7 +1389,7 @@ dependencies = [
 
 [[package]]
 name = "hades-app"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "arboard",
  "hades-core",
@@ -1403,7 +1403,7 @@ dependencies = [
 
 [[package]]
 name = "hades-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "argon2",
  "chacha20poly1305",
