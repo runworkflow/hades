@@ -22,7 +22,7 @@ export function SearchField({
         placeholder="Search"
         autoComplete="off"
         onChange={(event) => onChange(event.target.value)}
-        className="min-w-0 flex-1 bg-transparent text-ink outline-none placeholder:text-ink-muted"
+        className="min-w-0 flex-1 bg-transparent text-ink outline-none select-text placeholder:text-ink-muted"
       />
     </label>
   )

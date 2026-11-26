@@ -1,6 +1,6 @@
-import { AddIcon, PenIcon, TrashBinTrashIcon } from "@solar-icons/react/linear"
+import { AddIcon } from "@solar-icons/react/linear"
 
-import { IconButton } from "@/components/icon-button"
+import { DropdownMenu } from "@/components/dropdown-menu"
 import { PrimaryButton } from "@/components/primary-button"
 import { SearchField } from "@/components/search-field"
 
@@ -30,14 +30,17 @@ export function ItemsHeader({
         {title}
       </h1>
       {folderActions && (
-        <div className="flex gap-1">
-          <IconButton label="Edit folder" onClick={folderActions.onEdit}>
-            <PenIcon size={18} />
-          </IconButton>
-          <IconButton label="Delete folder" onClick={folderActions.onDelete}>
-            <TrashBinTrashIcon size={18} />
-          </IconButton>
-        </div>
+        <DropdownMenu
+          label="Folder actions"
+          items={[
+            { label: "Edit folder", onSelect: folderActions.onEdit },
+            {
+              label: "Delete folder",
+              onSelect: folderActions.onDelete,
+              isDanger: true,
+            },
+          ]}
+        />
       )}
       <SearchField
         value={searchText}

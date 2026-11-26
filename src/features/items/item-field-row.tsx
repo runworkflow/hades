@@ -46,7 +46,7 @@ export function ItemFieldRow({ itemId, kind, field }: ItemFieldRowProps) {
       <div className="flex items-start gap-1">
         {field.hasValue ? (
           <span
-            className={`min-w-0 flex-1 break-all whitespace-pre-wrap select-text ${textClasses}`}
+            className={`min-w-0 flex-1 break-all whitespace-pre-wrap ${textClasses}`}
           >
             {displayValue}
           </span>

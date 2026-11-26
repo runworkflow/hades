@@ -26,12 +26,15 @@
 html {
   font-size: 14px;
   background: var(--color-sidebar);
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 body {
   color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  -webkit-user-select: none;
   user-select: none;
   overflow: hidden;
 }
