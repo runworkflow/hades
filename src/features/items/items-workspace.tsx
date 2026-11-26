@@ -38,24 +38,24 @@ export function ItemsWorkspace({
   const currentFolderId = currentFolder?.id ?? null
 
   return (
-    <div className="flex min-h-0 min-w-0 flex-1">
-      <div className="flex min-w-0 flex-1 flex-col">
-        {renderHeader(
-          <ItemsHeader
-            title={title}
-            searchText={searchText}
-            onSearchChange={setSearchText}
-            onNewItem={setNewItemKind}
-            folderActions={
-              currentFolder
-                ? {
-                    onEdit: () => setIsEditFolderOpen(true),
-                    onDelete: () => setIsDeleteFolderOpen(true),
-                  }
-                : null
-            }
-          />
-        )}
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+      {renderHeader(
+        <ItemsHeader
+          title={title}
+          searchText={searchText}
+          onSearchChange={setSearchText}
+          onNewItem={setNewItemKind}
+          folderActions={
+            currentFolder
+              ? {
+                  onEdit: () => setIsEditFolderOpen(true),
+                  onDelete: () => setIsDeleteFolderOpen(true),
+                }
+              : null
+          }
+        />
+      )}
+      <div className="flex min-h-0 min-w-0 flex-1">
         <ItemsView
           searchText={searchText}
           items={selectItemsForView(items, viewId)}
@@ -66,15 +66,15 @@ export function ItemsWorkspace({
             if (openItemId && itemIds.includes(openItemId)) setOpenItemId(null)
           }}
         />
+        {openItemId && (
+          <ItemDetailPanel
+            key={openItemId}
+            itemId={openItemId}
+            folders={folders}
+            onClose={() => setOpenItemId(null)}
+          />
+        )}
       </div>
-      {openItemId && (
-        <ItemDetailPanel
-          key={openItemId}
-          itemId={openItemId}
-          folders={folders}
-          onClose={() => setOpenItemId(null)}
-        />
-      )}
       <NewItemDialog
         kind={newItemKind}
         folders={folders}

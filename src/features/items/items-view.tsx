@@ -27,7 +27,7 @@ export function ItemsView({
   const [activeTab, setActiveTab] = useState<ItemsTab>("items")
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col px-8 pt-2">
+    <section className="@container flex min-h-0 min-w-0 flex-1 flex-col px-8 pt-2">
       <div className="mb-6">
         <ItemsTabs activeTab={activeTab} onChange={setActiveTab} />
       </div>

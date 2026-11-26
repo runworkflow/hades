@@ -7,7 +7,11 @@ import { BulkActionsBar } from "./bulk-actions-bar"
 import { DeleteItemsDialog } from "./delete-items-dialog"
 import { ItemRow } from "./item-row"
 import type { VaultItem } from "./item-types"
-import { itemsGridClass } from "./items-grid"
+import {
+  folderColumnClass,
+  itemsGridClass,
+  typeColumnClass,
+} from "./items-grid"
 import { MoveItemsDialog } from "./move-items-dialog"
 
 type ItemsTableProps = {
@@ -77,8 +81,8 @@ export function ItemsTable({
           onToggle={toggleAllSelected}
         />
         <span>Name</span>
-        <span>Type</span>
-        <span>Folder</span>
+        <span className={typeColumnClass}>Type</span>
+        <span className={folderColumnClass}>Folder</span>
         <span>Modified</span>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto">

@@ -3,7 +3,11 @@ import { formatRelativeTime } from "@/lib/format-relative-time"
 
 import { itemKinds } from "./item-kinds"
 import type { VaultItem } from "./item-types"
-import { itemsGridClass } from "./items-grid"
+import {
+  folderColumnClass,
+  itemsGridClass,
+  typeColumnClass,
+} from "./items-grid"
 
 type ItemRowProps = {
   item: VaultItem
@@ -49,8 +53,12 @@ export function ItemRow({
         </span>
         <span className="truncate text-base">{item.name}</span>
       </button>
-      <span className="text-sm text-ink-muted">{kind.label}</span>
-      <span className="truncate text-sm text-ink-muted">{folderName}</span>
+      <span className={`${typeColumnClass} text-sm text-ink-muted`}>
+        {kind.label}
+      </span>
+      <span className={`${folderColumnClass} truncate text-sm text-ink-muted`}>
+        {folderName}
+      </span>
       <span className="text-sm text-ink-muted">
         {formatRelativeTime(item.modifiedAt)}
       </span>
