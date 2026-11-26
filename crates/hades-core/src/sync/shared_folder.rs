@@ -1,10 +1,11 @@
-use std::fs::{self, DirBuilder, File, OpenOptions};
+use std::fs::{self, DirBuilder};
 use std::io::{Read, Write};
-use std::os::unix::fs::{DirBuilderExt, OpenOptionsExt};
+use std::os::unix::fs::DirBuilderExt;
 use std::path::{Path, PathBuf};
 
-use crate::blobs::FileBlobStore;
+use crate::blobs::{FileBlobStore, MAX_FILE_SIZE};
 use crate::records::is_valid_record_id;
+use crate::safe_files::{create_exclusive_temporary_file, open_regular_file};
 use crate::store::Envelope;
 
 use super::record_file::{decode_envelope, encode_envelope};
@@ -18,8 +19,8 @@ const SETTINGS_FILE_NAME: &str = "vault.json";
 const RECORD_EXTENSION: &str = "json";
 const BLOB_EXTENSION: &str = "blob";
 const MAXIMUM_SMALL_FILE_BYTES: u64 = 4 * 1024 * 1024;
+const MAXIMUM_BLOB_FILE_BYTES: u64 = MAX_FILE_SIZE + 1024 * 1024;
 const OWNER_ONLY_DIRECTORY_MODE: u32 = 0o700;
-const OWNER_ONLY_FILE_MODE: u32 = 0o600;
 
 #[derive(Debug, Default)]
 pub struct RecordScan {
@@ -46,14 +47,9 @@ fn write_atomically(path: &Path, bytes: &[u8]) -> SyncResult<()> {
         .file_name()
         .and_then(|name| name.to_str())
         .ok_or(SyncError::InvalidName)?;
-    let temporary_path = path.with_file_name(format!(".{name}.tmp"));
+    let directory = path.parent().ok_or(SyncError::InvalidName)?;
+    let (mut file, temporary_path) = create_exclusive_temporary_file(directory, name)?;
     let outcome = (|| -> std::io::Result<()> {
-        let mut file = OpenOptions::new()
-            .write(true)
-            .create(true)
-            .truncate(true)
-            .mode(OWNER_ONLY_FILE_MODE)
-            .open(&temporary_path)?;
         file.write_all(bytes)?;
         file.sync_all()?;
         fs::rename(&temporary_path, path)
@@ -65,12 +61,9 @@ fn write_atomically(path: &Path, bytes: &[u8]) -> SyncResult<()> {
 }
 
 fn read_small_file(path: &Path) -> SyncResult<Vec<u8>> {
-    if !fs::symlink_metadata(path)?.is_file() {
-        return Err(SyncError::DamagedFile);
-    }
+    let file = open_regular_file(path).map_err(|_| SyncError::DamagedFile)?;
     let mut bytes = Vec::new();
-    File::open(path)?
-        .take(MAXIMUM_SMALL_FILE_BYTES + 1)
+    file.take(MAXIMUM_SMALL_FILE_BYTES + 1)
         .read_to_end(&mut bytes)?;
     if bytes.len() as u64 > MAXIMUM_SMALL_FILE_BYTES {
         return Err(SyncError::DamagedFile);
@@ -92,15 +85,26 @@ fn read_record_file(path: &Path, expected_id: &str) -> SyncResult<Envelope> {
     Ok(envelope)
 }
 
-fn copy_atomically(source: &Path, destination: &Path, temporary: &Path) -> SyncResult<()> {
-    let outcome = fs::copy(source, temporary).and_then(|_| {
-        File::open(temporary)?.sync_all()?;
-        fs::rename(temporary, destination)
-    });
+fn copy_atomically(source: &Path, destination: &Path, label: &str) -> SyncResult<()> {
+    let directory = destination.parent().ok_or(SyncError::InvalidName)?;
+    let mut source_file = open_regular_file(source).map_err(|_| SyncError::DamagedFile)?;
+    let (mut temporary_file, temporary_path) = create_exclusive_temporary_file(directory, label)?;
+    let outcome = (|| -> SyncResult<()> {
+        let copied = std::io::copy(
+            &mut (&mut source_file).take(MAXIMUM_BLOB_FILE_BYTES + 1),
+            &mut temporary_file,
+        )?;
+        if copied > MAXIMUM_BLOB_FILE_BYTES {
+            return Err(SyncError::DamagedFile);
+        }
+        temporary_file.sync_all()?;
+        fs::rename(&temporary_path, destination)?;
+        Ok(())
+    })();
     if outcome.is_err() {
-        let _ = fs::remove_file(temporary);
+        let _ = fs::remove_file(&temporary_path);
     }
-    Ok(outcome?)
+    outcome
 }
 
 impl SharedFolder {
@@ -188,8 +192,7 @@ impl SharedFolder {
         if destination.exists() {
             return Ok(());
         }
-        let temporary = self.blobs_directory.join(format!(".{id}.tmp"));
-        copy_atomically(&source, &destination, &temporary)
+        copy_atomically(&source, &destination, id)
     }
 
     pub fn pull_blob(&self, local: &FileBlobStore, id: &str) -> SyncResult<()> {
@@ -198,9 +201,6 @@ impl SharedFolder {
             return Ok(());
         }
         let source = self.blobs_directory.join(format!("{id}.{BLOB_EXTENSION}"));
-        let temporary = local
-            .temporary_path(id)
-            .map_err(|_| SyncError::InvalidName)?;
-        copy_atomically(&source, &destination, &temporary)
+        copy_atomically(&source, &destination, id)
     }
 }

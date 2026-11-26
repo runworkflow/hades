@@ -6,7 +6,7 @@ use crate::store::Store;
 use crate::vault::UnlockedVault;
 
 use super::shared_folder::SharedFolder;
-use super::sync_error::SyncResult;
+use super::sync_error::{SyncError, SyncResult};
 use super::sync_report::SyncReport;
 
 pub(super) fn push_missing_blobs(
@@ -17,8 +17,13 @@ pub(super) fn push_missing_blobs(
     let remote_ids: BTreeSet<String> = folder.list_blob_ids()?.into_iter().collect();
     for id in local.list_ids()? {
         if !remote_ids.contains(&id) {
-            folder.push_blob(local, &id)?;
-            report.blobs_pushed += 1;
+            match folder.push_blob(local, &id) {
+                Ok(()) => report.blobs_pushed += 1,
+                Err(SyncError::Io(_) | SyncError::DamagedFile) => {
+                    report.skipped_files.push(format!("{id}.blob"));
+                }
+                Err(error) => return Err(error),
+            }
         }
     }
     Ok(())

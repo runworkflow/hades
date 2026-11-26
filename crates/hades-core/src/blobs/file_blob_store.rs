@@ -48,10 +48,6 @@ impl FileBlobStore {
         self.path_with_extension(id, BLOB_EXTENSION)
     }
 
-    pub(crate) fn temporary_path(&self, id: &str) -> BlobResult<PathBuf> {
-        self.path_with_extension(id, TEMPORARY_EXTENSION)
-    }
-
     pub fn write<R: Read>(&self, id: &str, key: &SecretKey, reader: &mut R) -> BlobResult<u64> {
         let final_path = self.path_with_extension(id, BLOB_EXTENSION)?;
         let temporary_path = self.path_with_extension(id, TEMPORARY_EXTENSION)?;

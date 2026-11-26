@@ -5,6 +5,7 @@ mod items;
 mod key_derivation;
 mod key_wrapping;
 mod records;
+mod safe_files;
 mod sealed;
 mod secret_key;
 mod settings_authentication;
@@ -23,6 +24,7 @@ pub use items::{
 };
 pub use key_derivation::{KdfParams, SALT_LENGTH, Salt, derive_key};
 pub use key_wrapping::{WrappedKey, unwrap_key, wrap_key};
+pub use safe_files::{create_exclusive_temporary_file, open_regular_file};
 pub use sealed::{NONCE_LENGTH, Sealed, open, seal};
 pub use secret_key::{KEY_LENGTH, SecretKey};
 pub use settings_authentication::{is_settings_authentic, sign_settings};

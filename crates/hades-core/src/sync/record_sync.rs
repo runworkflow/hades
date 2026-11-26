@@ -8,7 +8,7 @@ use crate::vault::UnlockedVault;
 
 use super::merge::{ConflictWinner, MergeDecision, decide_merge, has_same_content};
 use super::shared_folder::SharedFolder;
-use super::sync_error::SyncResult;
+use super::sync_error::{SyncError, SyncResult};
 use super::sync_report::SyncReport;
 
 struct RecordSync<'a, S: Store> {
@@ -27,7 +27,14 @@ fn is_trustworthy(vault: &UnlockedVault, local: Option<&Envelope>, remote: &Enve
 
 impl<S: Store> RecordSync<'_, S> {
     fn push(&self, local: &Envelope, report: &mut SyncReport) -> SyncResult<()> {
-        self.folder.write_record(local)?;
+        match self.folder.write_record(local) {
+            Ok(()) => {}
+            Err(SyncError::Io(_)) => {
+                report.skipped_files.push(format!("{}.json", local.id));
+                return Ok(());
+            }
+            Err(error) => return Err(error),
+        }
         self.store
             .put_sync_baseline(&local.id, &SyncBaseline::of(local))?;
         report.records_pushed += 1;
