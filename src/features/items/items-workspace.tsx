@@ -5,7 +5,7 @@ import { EditFolderDialog } from "@/features/folders/edit-folder-dialog"
 import type { Folder } from "@/features/folders/folder-types"
 
 import { ItemDetailPanel } from "./item-detail-panel"
-import type { VaultItem } from "./item-types"
+import type { ItemKind, VaultItem } from "./item-types"
 import { ItemsHeader } from "./items-header"
 import { ItemsView } from "./items-view"
 import { NewItemDialog } from "./new-item-dialog"
@@ -30,7 +30,7 @@ export function ItemsWorkspace({
 }: ItemsWorkspaceProps) {
   const [openItemId, setOpenItemId] = useState<string | null>(null)
   const [searchText, setSearchText] = useState("")
-  const [isNewItemOpen, setIsNewItemOpen] = useState(false)
+  const [newItemKind, setNewItemKind] = useState<ItemKind | null>(null)
   const [isEditFolderOpen, setIsEditFolderOpen] = useState(false)
   const [isDeleteFolderOpen, setIsDeleteFolderOpen] = useState(false)
 
@@ -45,7 +45,7 @@ export function ItemsWorkspace({
             title={title}
             searchText={searchText}
             onSearchChange={setSearchText}
-            onNewItem={() => setIsNewItemOpen(true)}
+            onNewItem={setNewItemKind}
             folderActions={
               currentFolder
                 ? {
@@ -76,10 +76,10 @@ export function ItemsWorkspace({
         />
       )}
       <NewItemDialog
-        isOpen={isNewItemOpen}
+        kind={newItemKind}
         folders={folders}
         currentFolderId={currentFolderId}
-        onClose={() => setIsNewItemOpen(false)}
+        onClose={() => setNewItemKind(null)}
         onCreated={(item) => setOpenItemId(item.id)}
       />
       {currentFolder && (

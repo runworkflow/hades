@@ -1,19 +1,26 @@
-import { AddIcon } from "@solar-icons/react/linear"
+import { AddIcon, AltArrowDownIcon } from "@solar-icons/react/linear"
 
 import { DropdownMenu } from "@/components/dropdown-menu"
 import { PrimaryButton } from "@/components/primary-button"
 import { SearchField } from "@/components/search-field"
+
+import { creatableItemKinds } from "./item-field-specs"
+import { ItemKindTile } from "./item-kind-tile"
+import { itemKinds } from "./item-kinds"
+import type { ItemKind } from "./item-types"
 
 export type FolderActions = {
   onEdit: () => void
   onDelete: () => void
 }
 
+const newItemKinds: ItemKind[] = [...creatableItemKinds, "file"]
+
 type ItemsHeaderProps = {
   title: string
   searchText: string
   onSearchChange: (value: string) => void
-  onNewItem: () => void
+  onNewItem: (kind: ItemKind) => void
   folderActions: FolderActions | null
 }
 
@@ -47,10 +54,27 @@ export function ItemsHeader({
         onChange={onSearchChange}
         className="ml-auto"
       />
-      <PrimaryButton size="compact" onClick={onNewItem}>
-        <AddIcon size={16} />
-        New item
-      </PrimaryButton>
+      <DropdownMenu
+        label="New item"
+        align="right"
+        items={newItemKinds.map((kind) => ({
+          label: itemKinds[kind].label,
+          icon: <ItemKindTile kind={kind} size="small" />,
+          onSelect: () => onNewItem(kind),
+        }))}
+        renderTrigger={({ isOpen, onToggle }) => (
+          <PrimaryButton
+            size="compact"
+            aria-haspopup="menu"
+            aria-expanded={isOpen}
+            onClick={onToggle}
+          >
+            <AddIcon size={16} />
+            New item
+            <AltArrowDownIcon size={14} />
+          </PrimaryButton>
+        )}
+      />
     </div>
   )
 }

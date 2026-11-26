@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react"
 
+import { DialogActions } from "@/components/dialog-actions"
 import { FormError } from "@/components/form-error"
 import { Modal } from "@/components/modal"
 import { PrimaryButton } from "@/components/primary-button"
@@ -9,7 +10,8 @@ import type { Folder } from "@/features/folders/folder-types"
 
 import { ImportFileForm } from "./import-file-form"
 import { ItemFieldsInputs } from "./item-fields-inputs"
-import { ItemKindPicker } from "./item-kind-picker"
+import { ItemKindTile } from "./item-kind-tile"
+import { itemKinds } from "./item-kinds"
 import type { CreatableItemKind, ItemKind, VaultItem } from "./item-types"
 import { useCreateItem } from "./use-items"
 
@@ -69,48 +71,33 @@ function NewItemForm({
           label: folder.name,
         }))}
       />
+      <div className="h-px bg-line" />
       <ItemFieldsInputs kind={kind} values={fields} onChange={setField} />
       <FormError message={createItem.error?.message} />
-      <div className="mt-2 flex gap-3">
-        <button
-          type="button"
-          onClick={onClose}
-          className="h-11 flex-1 rounded-full bg-raised font-medium transition-colors hover:bg-raised-hover"
+      <DialogActions onCancel={onClose}>
+        <PrimaryButton
+          size="compact"
+          type="submit"
+          disabled={!name.trim() || createItem.isPending}
         >
-          Cancel
-        </button>
-        <div className="flex-1">
-          <PrimaryButton
-            type="submit"
-            disabled={!name.trim() || createItem.isPending}
-          >
-            Save item
-          </PrimaryButton>
-        </div>
-      </div>
+          {createItem.isPending ? "Saving" : "Save item"}
+        </PrimaryButton>
+      </DialogActions>
     </form>
   )
 }
 
-type NewItemContentProps = Omit<NewItemFormProps, "kind">
+type NewItemContentProps = Omit<NewItemFormProps, "kind"> & {
+  kind: ItemKind
+}
 
-function NewItemContent(props: NewItemContentProps) {
-  const [kind, setKind] = useState<ItemKind>("password")
-
-  return (
-    <div className="flex flex-col gap-4">
-      <ItemKindPicker selected={kind} onSelect={setKind} />
-      {kind === "file" ? (
-        <ImportFileForm {...props} />
-      ) : (
-        <NewItemForm key={kind} kind={kind} {...props} />
-      )}
-    </div>
-  )
+function NewItemContent({ kind, ...props }: NewItemContentProps) {
+  if (kind === "file") return <ImportFileForm {...props} />
+  return <NewItemForm key={kind} kind={kind} {...props} />
 }
 
 type NewItemDialogProps = {
-  isOpen: boolean
+  kind: ItemKind | null
   folders: Folder[]
   currentFolderId: string | null
   onClose: () => void
@@ -118,23 +105,32 @@ type NewItemDialogProps = {
 }
 
 export function NewItemDialog({
-  isOpen,
+  kind,
   folders,
   currentFolderId,
   onClose,
   onCreated,
 }: NewItemDialogProps) {
   const hasFolders = folders.length > 0
+  const formKind = hasFolders ? kind : null
 
   return (
-    <Modal isOpen={isOpen} title="New item" onClose={onClose}>
+    <Modal
+      isOpen={kind !== null}
+      title={formKind ? itemKinds[formKind].newTitle : "New item"}
+      icon={formKind ? <ItemKindTile kind={formKind} /> : undefined}
+      onClose={onClose}
+    >
       {hasFolders ? (
-        <NewItemContent
-          folders={folders}
-          defaultFolderId={currentFolderId ?? folders[0].id}
-          onClose={onClose}
-          onCreated={onCreated}
-        />
+        formKind && (
+          <NewItemContent
+            kind={formKind}
+            folders={folders}
+            defaultFolderId={currentFolderId ?? folders[0].id}
+            onClose={onClose}
+            onCreated={onCreated}
+          />
+        )
       ) : (
         <div className="flex flex-col gap-5">
           <p className="text-ink-muted">

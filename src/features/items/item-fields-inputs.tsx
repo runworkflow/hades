@@ -1,3 +1,4 @@
+import { SecretField } from "@/components/secret-field"
 import { TextAreaField } from "@/components/text-area-field"
 import { TextField } from "@/components/text-field"
 
@@ -28,19 +29,24 @@ export function ItemFieldsInputs({
           ? keepSecretHint
           : undefined
 
-        return spec.isMultiline ? (
-          <TextAreaField
+        if (spec.isMultiline) {
+          return (
+            <TextAreaField
+              key={fieldKey}
+              label={spec.label}
+              value={value}
+              placeholder={placeholder}
+              onChange={(event) => onChange(spec.key, event.target.value)}
+            />
+          )
+        }
+
+        const Field = spec.isSecret ? SecretField : TextField
+
+        return (
+          <Field
             key={fieldKey}
             label={spec.label}
-            value={value}
-            placeholder={placeholder}
-            onChange={(event) => onChange(spec.key, event.target.value)}
-          />
-        ) : (
-          <TextField
-            key={fieldKey}
-            label={spec.label}
-            type={spec.isSecret ? "password" : "text"}
             autoComplete="off"
             value={value}
             placeholder={placeholder}

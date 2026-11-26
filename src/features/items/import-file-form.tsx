@@ -1,5 +1,6 @@
 import { useState } from "react"
 
+import { DialogActions } from "@/components/dialog-actions"
 import { FormError } from "@/components/form-error"
 import { PrimaryButton } from "@/components/primary-button"
 import { SelectField } from "@/components/select-field"
@@ -50,23 +51,15 @@ export function ImportFileForm({
         original stays where it is.
       </p>
       <FormError message={importFile.error?.message} />
-      <div className="mt-2 flex gap-3">
-        <button
-          type="button"
-          onClick={onClose}
-          className="h-11 flex-1 rounded-full bg-raised font-medium transition-colors hover:bg-raised-hover"
+      <DialogActions onCancel={onClose}>
+        <PrimaryButton
+          size="compact"
+          disabled={importFile.isPending}
+          onClick={handleChooseFile}
         >
-          Cancel
-        </button>
-        <div className="flex-1">
-          <PrimaryButton
-            disabled={importFile.isPending}
-            onClick={handleChooseFile}
-          >
-            {importFile.isPending ? "Encrypting file" : "Choose file"}
-          </PrimaryButton>
-        </div>
-      </div>
+          {importFile.isPending ? "Encrypting file" : "Choose file"}
+        </PrimaryButton>
+      </DialogActions>
     </div>
   )
 }

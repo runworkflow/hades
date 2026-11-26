@@ -5,6 +5,7 @@ import {
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
   type MouseEvent,
+  type ReactNode,
 } from "react"
 import { MenuDotsIcon } from "@solar-icons/react/linear"
 
@@ -13,22 +14,35 @@ import { IconButton } from "./icon-button"
 export type DropdownMenuItem = {
   label: string
   onSelect: () => void
+  icon?: ReactNode
   isDanger?: boolean
+}
+
+type MenuTriggerState = {
+  isOpen: boolean
+  onToggle: (event: MouseEvent<HTMLButtonElement>) => void
 }
 
 type DropdownMenuProps = {
   label: string
   items: DropdownMenuItem[]
+  align?: "left" | "right"
+  renderTrigger?: (state: MenuTriggerState) => ReactNode
 }
 
-export function DropdownMenu({ label, items }: DropdownMenuProps) {
+export function DropdownMenu({
+  label,
+  items,
+  align = "left",
+  renderTrigger,
+}: DropdownMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
-  const shouldFocusFirstRef = useRef(false)
+  const [isOpenedByKeyboard, setIsOpenedByKeyboard] = useState(false)
 
   useEffect(() => {
     if (!isOpen) return
-    if (shouldFocusFirstRef.current) {
+    if (isOpenedByKeyboard) {
       rootRef.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus()
     }
     function closeOnOutsidePress(event: PointerEvent) {
@@ -43,10 +57,10 @@ export function DropdownMenu({ label, items }: DropdownMenuProps) {
       document.removeEventListener("pointerdown", closeOnOutsidePress)
       document.removeEventListener("keydown", closeOnEscape)
     }
-  }, [isOpen])
+  }, [isOpen, isOpenedByKeyboard])
 
   function toggle(event: MouseEvent<HTMLButtonElement>) {
-    shouldFocusFirstRef.current = event.detail === 0
+    setIsOpenedByKeyboard(event.detail === 0)
     setIsOpen((isOpenNow) => !isOpenNow)
   }
 
@@ -69,19 +83,23 @@ export function DropdownMenu({ label, items }: DropdownMenuProps) {
 
   return (
     <div ref={rootRef} className="relative">
-      <IconButton
-        label={label}
-        aria-haspopup="menu"
-        aria-expanded={isOpen}
-        onClick={toggle}
-      >
-        <MenuDotsIcon size={18} />
-      </IconButton>
+      {renderTrigger ? (
+        renderTrigger({ isOpen, onToggle: toggle })
+      ) : (
+        <IconButton
+          label={label}
+          aria-haspopup="menu"
+          aria-expanded={isOpen}
+          onClick={toggle}
+        >
+          <MenuDotsIcon size={18} />
+        </IconButton>
+      )}
       {isOpen && (
         <div
           role="menu"
           onKeyDown={moveFocus}
-          className="absolute top-full left-0 z-30 mt-1 min-w-44 rounded-xl border border-line bg-raised p-1 shadow-2xl"
+          className={`absolute top-full z-30 mt-1 min-w-48 rounded-xl border border-line bg-raised p-1 shadow-2xl ${align === "right" ? "right-0" : "left-0"}`}
         >
           {items.map((item, index) => (
             <Fragment key={item.label}>
@@ -95,8 +113,9 @@ export function DropdownMenu({ label, items }: DropdownMenuProps) {
                   setIsOpen(false)
                   item.onSelect()
                 }}
-                className={`flex w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-raised-hover focus:bg-raised-hover ${item.isDanger ? "text-danger" : "text-ink"}`}
+                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm hover:bg-raised-hover focus:bg-raised-hover ${item.isDanger ? "text-danger" : "text-ink"}`}
               >
+                {item.icon}
                 {item.label}
               </button>
             </Fragment>

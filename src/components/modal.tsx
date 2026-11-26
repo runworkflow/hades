@@ -3,11 +3,12 @@ import { useEffect, useRef, type ReactNode } from "react"
 type ModalProps = {
   isOpen: boolean
   title: string
+  icon?: ReactNode
   onClose: () => void
   children: ReactNode
 }
 
-export function Modal({ isOpen, title, onClose, children }: ModalProps) {
+export function Modal({ isOpen, title, icon, onClose, children }: ModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
 
   useEffect(() => {
@@ -28,7 +29,10 @@ export function Modal({ isOpen, title, onClose, children }: ModalProps) {
     >
       {isOpen && (
         <div className="p-6">
-          <h2 className="mb-5 text-xl font-semibold">{title}</h2>
+          <div className="mb-5 flex items-center gap-3">
+            {icon}
+            <h2 className="text-xl font-semibold">{title}</h2>
+          </div>
           {children}
         </div>
       )}
