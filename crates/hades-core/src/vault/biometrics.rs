@@ -6,6 +6,7 @@ use crate::store::{BiometricSettings, Store, StoreResult, VaultSettings};
 
 use super::credentials::confirmed_settings;
 use super::error::{VaultError, VaultResult};
+use super::lifecycle::ensure_settings_authenticated;
 use super::unlocked_vault::UnlockedVault;
 
 const BIOMETRIC_WRAP_CONTEXT: &[u8] = b"hades:vault-key:biometric";
@@ -93,7 +94,10 @@ pub fn unlock_with_biometrics<S: Store, P: BiometricProvider>(
     let settings = store
         .get_vault_settings()?
         .ok_or(VaultError::NotInitialized)?;
-    let biometric = settings.biometric.ok_or(VaultError::BiometricsNotEnabled)?;
+    let biometric = settings
+        .biometric
+        .as_ref()
+        .ok_or(VaultError::BiometricsNotEnabled)?;
 
     let derived_key = provider.derive_key(
         &biometric.key_blob,
@@ -102,5 +106,6 @@ pub fn unlock_with_biometrics<S: Store, P: BiometricProvider>(
     )?;
     let vault_key = unwrap_key(&derived_key, &biometric.wrapped_key, BIOMETRIC_WRAP_CONTEXT)
         .map_err(|_| BiometricError::KeyChanged)?;
+    ensure_settings_authenticated(store, &settings, &vault_key)?;
     Ok(UnlockedVault::new(vault_key))
 }

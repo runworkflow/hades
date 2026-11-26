@@ -7,6 +7,7 @@ mod key_wrapping;
 mod records;
 mod sealed;
 mod secret_key;
+mod settings_authentication;
 mod store;
 mod sync;
 mod vault;
@@ -24,6 +25,7 @@ pub use key_derivation::{KdfParams, SALT_LENGTH, Salt, derive_key};
 pub use key_wrapping::{WrappedKey, unwrap_key, wrap_key};
 pub use sealed::{NONCE_LENGTH, Sealed, open, seal};
 pub use secret_key::{KEY_LENGTH, SecretKey};
+pub use settings_authentication::{is_settings_authentic, sign_settings};
 pub use store::{
     Envelope, EnvelopeKind, SqliteStore, Store, StoreError, StoreResult, SyncBaseline,
     VaultSettings,

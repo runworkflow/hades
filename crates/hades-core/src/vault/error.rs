@@ -20,6 +20,8 @@ pub enum VaultError {
     InvalidRecoveryKey,
     #[error("incorrect recovery key")]
     IncorrectRecoveryKey,
+    #[error("the vault settings were changed by someone without your key")]
+    SettingsNotAuthentic,
     #[error("the vault is locked")]
     VaultLocked,
     #[error("the name must be between 1 and {maximum_length} characters")]

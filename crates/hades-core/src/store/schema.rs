@@ -2,7 +2,7 @@ use rusqlite::Connection;
 
 use super::error::{StoreError, StoreResult};
 
-const CURRENT_SCHEMA_VERSION: i64 = 5;
+const CURRENT_SCHEMA_VERSION: i64 = 6;
 
 const CREATE_SCHEMA_VERSION_1: &str = "
     BEGIN;
@@ -75,6 +75,14 @@ const UPGRADE_TO_SCHEMA_VERSION_5: &str = "
     COMMIT;
 ";
 
+const UPGRADE_TO_SCHEMA_VERSION_6: &str = "
+    BEGIN;
+    ALTER TABLE vault_settings ADD COLUMN settings_auth_nonce BLOB;
+    ALTER TABLE vault_settings ADD COLUMN settings_auth_ciphertext BLOB;
+    PRAGMA user_version = 6;
+    COMMIT;
+";
+
 pub fn prepare_database(connection: &Connection) -> StoreResult<()> {
     connection.pragma_update(None, "secure_delete", "ON")?;
     let mut version: i64 = connection.pragma_query_value(None, "user_version", |row| row.get(0))?;
@@ -100,6 +108,10 @@ pub fn prepare_database(connection: &Connection) -> StoreResult<()> {
     }
     if version == 4 {
         connection.execute_batch(UPGRADE_TO_SCHEMA_VERSION_5)?;
+        version = 5;
+    }
+    if version == 5 {
+        connection.execute_batch(UPGRADE_TO_SCHEMA_VERSION_6)?;
     }
     Ok(())
 }

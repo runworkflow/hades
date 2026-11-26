@@ -74,6 +74,11 @@ impl From<VaultError> for CommandError {
             VaultError::IncorrectPassword => Self::new("incorrect_password", message),
             VaultError::InvalidRecoveryKey => Self::new("invalid_recovery_key", message),
             VaultError::IncorrectRecoveryKey => Self::new("incorrect_recovery_key", message),
+            VaultError::SettingsNotAuthentic => Self::new(
+                "settings_not_authentic",
+                "This vault's settings were changed by someone without your key, so Hades will not unlock it. Check your sync folder and try again."
+                    .to_string(),
+            ),
             VaultError::VaultLocked => Self::new("vault_locked", message),
             VaultError::InvalidName { .. } => Self::new("invalid_name", message),
             VaultError::InvalidIcon => Self::new("invalid_icon", message),

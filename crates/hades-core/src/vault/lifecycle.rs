@@ -2,6 +2,7 @@ use crate::key_derivation::{KdfParams, Salt, derive_key};
 use crate::key_wrapping::{unwrap_key, wrap_key};
 use crate::records::new_record_id;
 use crate::secret_key::SecretKey;
+use crate::settings_authentication::{is_settings_authentic, sign_settings};
 use crate::store::{Store, VaultSettings};
 
 use super::error::{VaultError, VaultResult};
@@ -30,7 +31,7 @@ pub fn create_vault<S: Store>(store: &S, password: &str, created_at: i64) -> Vau
     let kdf_params = KdfParams::default();
 
     let password_key = derive_key(normalized_password.as_bytes(), &kdf_salt, &kdf_params)?;
-    let settings = VaultSettings {
+    let unsigned_settings = VaultSettings {
         vault_id: new_record_id(),
         settings_version: 1,
         created_at,
@@ -42,9 +43,14 @@ pub fn create_vault<S: Store>(store: &S, password: &str, created_at: i64) -> Vau
             &vault_key,
             RECOVERY_WRAP_CONTEXT,
         )?,
+        authentication: None,
         biometric: None,
     };
-    store.put_vault_settings(&settings)?;
+    let authentication = sign_settings(&vault_key, &unsigned_settings)?;
+    store.put_vault_settings(&VaultSettings {
+        authentication: Some(authentication),
+        ..unsigned_settings
+    })?;
 
     Ok(NewVault {
         vault: UnlockedVault::new(vault_key),
@@ -70,13 +76,37 @@ pub(super) fn unwrap_with_password(
     .map_err(|_| VaultError::IncorrectPassword)
 }
 
+pub(super) fn ensure_settings_authenticated<S: Store>(
+    store: &S,
+    settings: &VaultSettings,
+    vault_key: &SecretKey,
+) -> VaultResult<()> {
+    match &settings.authentication {
+        Some(authentication) => {
+            if is_settings_authentic(vault_key, settings, authentication) {
+                Ok(())
+            } else {
+                Err(VaultError::SettingsNotAuthentic)
+            }
+        }
+        None => {
+            let authentication = sign_settings(vault_key, settings)?;
+            store.put_vault_settings(&VaultSettings {
+                authentication: Some(authentication),
+                ..settings.clone()
+            })?;
+            Ok(())
+        }
+    }
+}
+
 pub fn unlock_with_password<S: Store>(store: &S, password: &str) -> VaultResult<UnlockedVault> {
     let settings = store
         .get_vault_settings()?
         .ok_or(VaultError::NotInitialized)?;
-    Ok(UnlockedVault::new(unwrap_with_password(
-        &settings, password,
-    )?))
+    let vault_key = unwrap_with_password(&settings, password)?;
+    ensure_settings_authenticated(store, &settings, &vault_key)?;
+    Ok(UnlockedVault::new(vault_key))
 }
 
 pub fn unlock_with_recovery_key<S: Store>(
@@ -94,5 +124,6 @@ pub fn unlock_with_recovery_key<S: Store>(
         RECOVERY_WRAP_CONTEXT,
     )
     .map_err(|_| VaultError::IncorrectRecoveryKey)?;
+    ensure_settings_authenticated(store, &settings, &vault_key)?;
     Ok(UnlockedVault::new(vault_key))
 }

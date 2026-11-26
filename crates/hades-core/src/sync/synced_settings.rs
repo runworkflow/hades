@@ -45,6 +45,7 @@ impl SyncedSettings {
             kdf_params: self.kdf_params,
             password_wrapped_key: self.password_wrapped_key,
             recovery_wrapped_key: self.recovery_wrapped_key,
+            authentication: None,
             biometric,
         }
     }

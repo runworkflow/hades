@@ -1,5 +1,6 @@
 use crate::key_derivation::{KdfParams, Salt};
 use crate::key_wrapping::WrappedKey;
+use crate::sealed::Sealed;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BiometricSettings {
@@ -17,5 +18,6 @@ pub struct VaultSettings {
     pub kdf_params: KdfParams,
     pub password_wrapped_key: WrappedKey,
     pub recovery_wrapped_key: WrappedKey,
+    pub authentication: Option<Sealed>,
     pub biometric: Option<BiometricSettings>,
 }

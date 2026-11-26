@@ -10,7 +10,8 @@ use super::vault_settings::{BiometricSettings, VaultSettings};
 pub const SELECT_SETTINGS_COLUMNS: &str =
     "vault_id, settings_version, created_at, kdf_salt, kdf_memory_kib, kdf_iterations, kdf_lanes,
      password_key_nonce, password_key_ciphertext, recovery_key_nonce, recovery_key_ciphertext,
-     biometric_key_blob, biometric_public_key, biometric_key_nonce, biometric_key_ciphertext";
+     biometric_key_blob, biometric_public_key, biometric_key_nonce, biometric_key_ciphertext,
+     settings_auth_nonce, settings_auth_ciphertext";
 
 pub struct StoredSettingsRow {
     vault_id: String,
@@ -28,6 +29,8 @@ pub struct StoredSettingsRow {
     biometric_public_key: Option<Vec<u8>>,
     biometric_key_nonce: Option<Vec<u8>>,
     biometric_key_ciphertext: Option<Vec<u8>>,
+    settings_auth_nonce: Option<Vec<u8>>,
+    settings_auth_ciphertext: Option<Vec<u8>>,
 }
 
 impl StoredSettingsRow {
@@ -48,6 +51,8 @@ impl StoredSettingsRow {
             biometric_public_key: row.get(12)?,
             biometric_key_nonce: row.get(13)?,
             biometric_key_ciphertext: row.get(14)?,
+            settings_auth_nonce: row.get(15)?,
+            settings_auth_ciphertext: row.get(16)?,
         })
     }
 }
@@ -78,11 +83,26 @@ fn read_biometric(row: &mut StoredSettingsRow) -> Result<Option<BiometricSetting
     }
 }
 
+fn read_authentication(row: &mut StoredSettingsRow) -> Result<Option<Sealed>, StoreError> {
+    match (
+        row.settings_auth_nonce.take(),
+        row.settings_auth_ciphertext.take(),
+    ) {
+        (None, None) => Ok(None),
+        (Some(nonce), Some(ciphertext)) => Ok(Some(Sealed {
+            nonce: read_nonce(nonce)?,
+            ciphertext,
+        })),
+        _ => Err(StoreError::CorruptRecord),
+    }
+}
+
 impl TryFrom<StoredSettingsRow> for VaultSettings {
     type Error = StoreError;
 
     fn try_from(mut row: StoredSettingsRow) -> Result<Self, Self::Error> {
         let biometric = read_biometric(&mut row)?;
+        let authentication = read_authentication(&mut row)?;
         let salt_bytes: [u8; SALT_LENGTH] = row
             .kdf_salt
             .try_into()
@@ -107,6 +127,7 @@ impl TryFrom<StoredSettingsRow> for VaultSettings {
                 nonce: read_nonce(row.recovery_key_nonce)?,
                 ciphertext: row.recovery_key_ciphertext,
             }),
+            authentication,
             biometric,
         })
     }
