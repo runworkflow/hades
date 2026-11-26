@@ -10,6 +10,8 @@ pub struct BiometricSettings {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VaultSettings {
+    pub vault_id: String,
+    pub settings_version: u64,
     pub created_at: i64,
     pub kdf_salt: Salt,
     pub kdf_params: KdfParams,

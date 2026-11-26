@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-use crate::store::Envelope;
+use crate::store::{Envelope, SyncBaseline};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ConflictWinner {
@@ -19,7 +19,7 @@ pub enum MergeDecision {
     },
 }
 
-fn has_same_content(first: &Envelope, second: &Envelope) -> bool {
+pub(super) fn has_same_content(first: &Envelope, second: &Envelope) -> bool {
     first.version == second.version
         && first.is_deleted == second.is_deleted
         && first.wrapped_key == second.wrapped_key
@@ -49,7 +49,7 @@ fn resolve_conflict(local: &Envelope, remote: &Envelope) -> MergeDecision {
 pub fn decide_merge(
     local: Option<&Envelope>,
     remote: Option<&Envelope>,
-    synced_version: Option<u64>,
+    baseline: Option<&SyncBaseline>,
 ) -> MergeDecision {
     let (local, remote) = match (local, remote) {
         (None, None) => return MergeDecision::AlreadyInSync,
@@ -61,9 +61,10 @@ pub fn decide_merge(
         return MergeDecision::AlreadyInSync;
     }
 
-    let synced_version = synced_version.unwrap_or(0);
-    let has_local_changes = local.version > synced_version;
-    let has_remote_changes = remote.version > synced_version;
+    let has_local_changes = baseline.is_none_or(|known| local.payload.nonce != known.payload_nonce);
+    let has_remote_changes = baseline.is_none_or(|known| {
+        remote.payload.nonce != known.payload_nonce && remote.version >= known.version
+    });
     match (has_local_changes, has_remote_changes) {
         (true, true) => resolve_conflict(local, remote),
         (true, false) => MergeDecision::PushLocal,

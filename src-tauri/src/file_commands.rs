@@ -62,6 +62,7 @@ pub fn import_file(
         &mut reader,
         current_unix_millis(),
     )?;
+    vault.note_change();
     Ok(Some(summary.into()))
 }
 

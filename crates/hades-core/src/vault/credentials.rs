@@ -34,6 +34,7 @@ pub fn change_password<S: Store>(
     let password_key = derive_key(normalized_new_password.as_bytes(), &kdf_salt, &kdf_params)?;
 
     store.put_vault_settings(&VaultSettings {
+        settings_version: settings.settings_version + 1,
         kdf_salt,
         kdf_params,
         password_wrapped_key: wrap_key(&password_key, vault.vault_key(), PASSWORD_WRAP_CONTEXT)?,
@@ -51,6 +52,7 @@ pub fn regenerate_recovery_key<S: Store>(
     let recovery_key = RecoveryKey::generate();
 
     store.put_vault_settings(&VaultSettings {
+        settings_version: settings.settings_version + 1,
         recovery_wrapped_key: wrap_key(
             recovery_key.as_secret_key(),
             vault.vault_key(),

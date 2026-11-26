@@ -12,6 +12,10 @@ mod macos_system_events;
 mod process_protection;
 mod secret_clipboard;
 mod security_commands;
+mod sync_commands;
+mod sync_folder_file;
+mod sync_runner;
+mod sync_state;
 mod vault_commands;
 
 use tauri::Manager;
@@ -28,6 +32,7 @@ pub fn run() {
             app.manage(AppVault::open(&data_directory)?);
             auto_lock_runner::start(app.handle().clone());
             macos_system_events::start(app.handle().clone());
+            sync_runner::start(app.handle().clone());
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -58,6 +63,11 @@ pub fn run() {
             biometric_commands::enable_biometric_unlock,
             biometric_commands::disable_biometric_unlock,
             biometric_commands::unlock_with_biometrics,
+            sync_commands::get_sync_status,
+            sync_commands::choose_sync_folder,
+            sync_commands::turn_off_sync,
+            sync_commands::sync_now,
+            sync_commands::join_from_sync_folder,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

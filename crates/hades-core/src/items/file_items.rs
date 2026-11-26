@@ -108,17 +108,25 @@ pub fn export_file_item<S: Store, W: Write>(
     Ok(size)
 }
 
-pub fn remove_orphan_blobs<S: Store>(
+pub(crate) fn referenced_blob_ids<S: Store>(
     store: &S,
     vault: &UnlockedVault,
-    blob_store: &FileBlobStore,
-) -> VaultResult<usize> {
+) -> VaultResult<BTreeSet<String>> {
     let mut referenced = BTreeSet::new();
     for envelope in store.list_envelopes(EnvelopeKind::Item)? {
         if let Some(file) = read_data(vault, &envelope)?.file {
             referenced.insert(file.blob_id);
         }
     }
+    Ok(referenced)
+}
+
+pub fn remove_orphan_blobs<S: Store>(
+    store: &S,
+    vault: &UnlockedVault,
+    blob_store: &FileBlobStore,
+) -> VaultResult<usize> {
+    let referenced = referenced_blob_ids(store, vault)?;
 
     let mut removed = 0;
     for id in blob_store.list_ids()? {

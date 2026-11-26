@@ -1,7 +1,7 @@
 use std::error::Error;
 use std::fs::{self, DirBuilder, Permissions};
 use std::os::unix::fs::{DirBuilderExt, PermissionsExt};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
 use hades_core::{
@@ -10,6 +10,8 @@ use hades_core::{
 
 use crate::clock::current_unix_millis;
 use crate::secret_clipboard::SecretClipboard;
+use crate::sync_folder_file;
+use crate::sync_state::SyncState;
 
 const VAULT_FILE_NAME: &str = "vault.db";
 const BLOBS_DIRECTORY_NAME: &str = "blobs";
@@ -21,6 +23,8 @@ pub struct AppVault {
     pub auto_lock: Mutex<AutoLockMonitor>,
     pub unlock_throttle: Mutex<UnlockThrottle>,
     pub clipboard: SecretClipboard,
+    pub sync: SyncState,
+    pub data_directory: PathBuf,
 }
 
 impl AppVault {
@@ -46,7 +50,18 @@ impl AppVault {
             )),
             unlock_throttle: Mutex::new(UnlockThrottle::default()),
             clipboard: SecretClipboard::default(),
+            sync: SyncState::with_folder(sync_folder_file::load(data_directory)),
+            data_directory: data_directory.to_path_buf(),
         })
+    }
+
+    pub fn after_unlock(&self) {
+        self.remove_orphan_blobs();
+        self.sync.request();
+    }
+
+    pub fn note_change(&self) {
+        self.sync.note_change(current_unix_millis());
     }
 
     pub fn remove_orphan_blobs(&self) {

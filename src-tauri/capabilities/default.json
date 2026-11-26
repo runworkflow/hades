@@ -35,6 +35,11 @@
     "allow-get-biometric-status",
     "allow-enable-biometric-unlock",
     "allow-disable-biometric-unlock",
-    "allow-unlock-with-biometrics"
+    "allow-unlock-with-biometrics",
+    "allow-get-sync-status",
+    "allow-choose-sync-folder",
+    "allow-turn-off-sync",
+    "allow-sync-now",
+    "allow-join-from-sync-folder"
   ]
 }

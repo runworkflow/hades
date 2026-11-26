@@ -40,4 +40,10 @@ pub fn lock_now(app: &AppHandle, vault: &AppVault, reason: LockReason) {
     drop(session);
     vault.clipboard.clear_now();
     let _ = app.emit(VAULT_LOCKED_EVENT, reason.as_str());
+    push_after_lock(app);
+}
+
+pub fn push_after_lock(app: &AppHandle) {
+    let app = app.clone();
+    thread::spawn(move || crate::sync_runner::push_on_lock(&app.state::<AppVault>()));
 }

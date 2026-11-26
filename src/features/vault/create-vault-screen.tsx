@@ -3,6 +3,7 @@ import { useState, type FormEvent } from "react"
 import { FormError } from "@/components/form-error"
 import { PrimaryButton } from "@/components/primary-button"
 import { TextField } from "@/components/text-field"
+import { useJoinFromSyncFolder } from "@/features/sync/use-sync"
 
 import { useCreateVault } from "./use-vault"
 import { VaultScreenLayout } from "./vault-screen-layout"
@@ -16,6 +17,7 @@ export function CreateVaultScreen({ onCreated }: CreateVaultScreenProps) {
   const [confirmation, setConfirmation] = useState("")
   const [hasMismatch, setHasMismatch] = useState(false)
   const createVault = useCreateVault()
+  const joinFromSyncFolder = useJoinFromSyncFolder()
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault()
@@ -35,7 +37,7 @@ export function CreateVaultScreen({ onCreated }: CreateVaultScreenProps) {
 
   const errorMessage = hasMismatch
     ? "The passwords do not match."
-    : createVault.error?.message
+    : (createVault.error?.message ?? joinFromSyncFolder.error?.message)
 
   return (
     <VaultScreenLayout
@@ -66,6 +68,14 @@ export function CreateVaultScreen({ onCreated }: CreateVaultScreenProps) {
           {createVault.isPending ? "Creating vault" : "Create vault"}
         </PrimaryButton>
       </form>
+      <button
+        type="button"
+        disabled={joinFromSyncFolder.isPending}
+        onClick={() => joinFromSyncFolder.mutate()}
+        className="text-sm text-ink-muted transition-colors hover:text-ink disabled:opacity-40"
+      >
+        Join a vault from a sync folder instead
+      </button>
     </VaultScreenLayout>
   )
 }

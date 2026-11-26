@@ -30,6 +30,11 @@ const APP_COMMANDS: &[&str] = &[
     "enable_biometric_unlock",
     "disable_biometric_unlock",
     "unlock_with_biometrics",
+    "get_sync_status",
+    "choose_sync_folder",
+    "turn_off_sync",
+    "sync_now",
+    "join_from_sync_folder",
 ];
 
 const MINIMUM_MACOS_VERSION: &str = "11.0";

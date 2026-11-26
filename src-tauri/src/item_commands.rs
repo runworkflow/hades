@@ -104,6 +104,7 @@ pub fn create_item(
         fields: fields.into_iter().collect(),
     };
     let summary = lock_session(&vault)?.create_item(new_item, current_unix_millis())?;
+    vault.note_change();
     Ok(summary.into())
 }
 
@@ -121,6 +122,7 @@ pub fn update_item(
         fields: fields.into_iter().collect(),
     };
     let summary = lock_session(&vault)?.update_item(&item_id, update, current_unix_millis())?;
+    vault.note_change();
     Ok(summary.into())
 }
 
@@ -128,6 +130,7 @@ pub fn update_item(
 pub fn delete_item(vault: State<'_, AppVault>, item_id: String) -> Result<(), CommandError> {
     lock_session(&vault)?.delete_item(&item_id, current_unix_millis())?;
     vault.remove_orphan_blobs();
+    vault.note_change();
     Ok(())
 }
 
@@ -138,6 +141,7 @@ pub fn delete_items(
 ) -> Result<usize, CommandError> {
     let deleted_count = lock_session(&vault)?.delete_items(&item_ids, current_unix_millis())?;
     vault.remove_orphan_blobs();
+    vault.note_change();
     Ok(deleted_count)
 }
 
@@ -147,7 +151,10 @@ pub fn move_items(
     item_ids: Vec<String>,
     folder_id: String,
 ) -> Result<usize, CommandError> {
-    Ok(lock_session(&vault)?.move_items(&item_ids, &folder_id, current_unix_millis())?)
+    let moved_count =
+        lock_session(&vault)?.move_items(&item_ids, &folder_id, current_unix_millis())?;
+    vault.note_change();
+    Ok(moved_count)
 }
 
 #[tauri::command(async)]

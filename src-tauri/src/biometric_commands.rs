@@ -66,7 +66,7 @@ pub fn unlock_with_biometrics(vault: State<'_, AppVault>) -> Result<bool, Comman
     let unlocked = finish_with_cancel_as_false(result)?;
     if unlocked {
         record_unlock_success(&vault);
-        vault.remove_orphan_blobs();
+        vault.after_unlock();
     }
     Ok(unlocked)
 }

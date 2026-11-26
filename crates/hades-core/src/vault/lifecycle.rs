@@ -1,5 +1,6 @@
 use crate::key_derivation::{KdfParams, Salt, derive_key};
 use crate::key_wrapping::{unwrap_key, wrap_key};
+use crate::records::new_record_id;
 use crate::secret_key::SecretKey;
 use crate::store::{Store, VaultSettings};
 
@@ -30,6 +31,8 @@ pub fn create_vault<S: Store>(store: &S, password: &str, created_at: i64) -> Vau
 
     let password_key = derive_key(normalized_password.as_bytes(), &kdf_salt, &kdf_params)?;
     let settings = VaultSettings {
+        vault_id: new_record_id(),
+        settings_version: 1,
         created_at,
         kdf_salt,
         kdf_params,

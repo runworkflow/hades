@@ -2,7 +2,7 @@ use std::sync::{MutexGuard, PoisonError};
 
 use hades_core::{SqliteStore, VaultError, VaultSession, VaultStatus};
 use serde::Serialize;
-use tauri::State;
+use tauri::{AppHandle, State};
 use zeroize::Zeroizing;
 
 use crate::app_vault::AppVault;
@@ -94,6 +94,7 @@ pub fn create_vault(
     let password = Zeroizing::new(password);
     record_activity(&vault);
     let recovery_key = lock_session(&vault)?.create(&password, current_unix_millis())?;
+    vault.note_change();
     Ok(CreatedVault {
         recovery_key: recovery_key.to_display_text().to_string(),
     })
@@ -109,7 +110,7 @@ pub fn unlock_with_password(
     throttled(&vault, || {
         lock_session_for_attempt(&vault).unlock_with_password(&password)
     })?;
-    vault.remove_orphan_blobs();
+    vault.after_unlock();
     Ok(())
 }
 
@@ -123,14 +124,15 @@ pub fn unlock_with_recovery_key(
     throttled(&vault, || {
         lock_session_for_attempt(&vault).unlock_with_recovery_key(&recovery_key)
     })?;
-    vault.remove_orphan_blobs();
+    vault.after_unlock();
     Ok(())
 }
 
 #[tauri::command(async)]
-pub fn lock_vault(vault: State<'_, AppVault>) -> Result<(), CommandError> {
+pub fn lock_vault(app: AppHandle, vault: State<'_, AppVault>) -> Result<(), CommandError> {
     lock_session(&vault)?.lock();
     vault.clipboard.clear_now();
+    crate::auto_lock_runner::push_after_lock(&app);
     Ok(())
 }
 

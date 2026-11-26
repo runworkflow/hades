@@ -24,6 +24,7 @@ pub fn change_password(
     throttled(&vault, || {
         lock_session_for_attempt(&vault).change_password(&current_password, &new_password)
     })?;
+    vault.note_change();
     Ok(())
 }
 
@@ -37,6 +38,7 @@ pub fn create_new_recovery_key(
     let recovery_key = throttled(&vault, || {
         lock_session_for_attempt(&vault).regenerate_recovery_key(&current_password)
     })?;
+    vault.note_change();
     Ok(NewRecoveryKey {
         recovery_key: recovery_key.to_display_text().to_string(),
     })

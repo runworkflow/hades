@@ -2,7 +2,7 @@ use rusqlite::Connection;
 
 use super::error::{StoreError, StoreResult};
 
-const CURRENT_SCHEMA_VERSION: i64 = 3;
+const CURRENT_SCHEMA_VERSION: i64 = 5;
 
 const CREATE_SCHEMA_VERSION_1: &str = "
     BEGIN;
@@ -50,6 +50,31 @@ const UPGRADE_TO_SCHEMA_VERSION_3: &str = "
     COMMIT;
 ";
 
+const UPGRADE_TO_SCHEMA_VERSION_4: &str = "
+    BEGIN;
+    ALTER TABLE vault_settings ADD COLUMN vault_id TEXT;
+    ALTER TABLE vault_settings ADD COLUMN settings_version INTEGER NOT NULL DEFAULT 1;
+    UPDATE vault_settings SET vault_id = lower(hex(randomblob(16)));
+    CREATE TABLE sync_baselines (
+        id TEXT PRIMARY KEY NOT NULL,
+        version INTEGER NOT NULL
+    ) STRICT;
+    PRAGMA user_version = 4;
+    COMMIT;
+";
+
+const UPGRADE_TO_SCHEMA_VERSION_5: &str = "
+    BEGIN;
+    DROP TABLE sync_baselines;
+    CREATE TABLE sync_baselines (
+        id TEXT PRIMARY KEY NOT NULL,
+        version INTEGER NOT NULL,
+        payload_nonce BLOB NOT NULL
+    ) STRICT;
+    PRAGMA user_version = 5;
+    COMMIT;
+";
+
 pub fn prepare_database(connection: &Connection) -> StoreResult<()> {
     connection.pragma_update(None, "secure_delete", "ON")?;
     let mut version: i64 = connection.pragma_query_value(None, "user_version", |row| row.get(0))?;
@@ -67,6 +92,14 @@ pub fn prepare_database(connection: &Connection) -> StoreResult<()> {
     }
     if version == 2 {
         connection.execute_batch(UPGRADE_TO_SCHEMA_VERSION_3)?;
+        version = 3;
+    }
+    if version == 3 {
+        connection.execute_batch(UPGRADE_TO_SCHEMA_VERSION_4)?;
+        version = 4;
+    }
+    if version == 4 {
+        connection.execute_batch(UPGRADE_TO_SCHEMA_VERSION_5)?;
     }
     Ok(())
 }

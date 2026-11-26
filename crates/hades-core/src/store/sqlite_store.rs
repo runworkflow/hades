@@ -10,6 +10,7 @@ use super::error::{StoreError, StoreResult};
 use super::schema::prepare_database;
 use super::settings_row::{SELECT_SETTINGS_COLUMNS, StoredSettingsRow};
 use super::stored_row::{SELECT_COLUMNS, StoredRow};
+use super::sync_baseline::SyncBaseline;
 use super::vault_settings::VaultSettings;
 
 const OWNER_ONLY_FILE_MODE: u32 = 0o600;
@@ -31,14 +32,21 @@ const UPSERT_ENVELOPE: &str = "
     WHERE excluded.version > envelopes.version
 ";
 
+const REPLACE_ENVELOPE: &str = "
+    INSERT OR REPLACE INTO envelopes (
+        id, kind, version, is_deleted, modified_at,
+        key_nonce, key_ciphertext, nonce, ciphertext
+    ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)
+";
+
 const REPLACE_VAULT_SETTINGS: &str = "
     INSERT OR REPLACE INTO vault_settings (
-        id, created_at, kdf_salt, kdf_memory_kib, kdf_iterations, kdf_lanes,
+        id, vault_id, settings_version, created_at, kdf_salt, kdf_memory_kib, kdf_iterations, kdf_lanes,
         password_key_nonce, password_key_ciphertext,
         recovery_key_nonce, recovery_key_ciphertext,
         biometric_key_blob, biometric_public_key,
         biometric_key_nonce, biometric_key_ciphertext
-    ) VALUES (1, ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)
+    ) VALUES (1, ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15)
 ";
 
 pub struct SqliteStore {
@@ -115,6 +123,34 @@ impl Store for SqliteStore {
         stored_rows.into_iter().map(Envelope::try_from).collect()
     }
 
+    fn list_all_envelopes(&self) -> StoreResult<Vec<Envelope>> {
+        let query = format!("SELECT {SELECT_COLUMNS} FROM envelopes ORDER BY id");
+        let mut statement = self.connection.prepare(&query)?;
+        let stored_rows = statement
+            .query_map([], StoredRow::from_row)?
+            .collect::<Result<Vec<_>, _>>()?;
+        stored_rows.into_iter().map(Envelope::try_from).collect()
+    }
+
+    fn replace_envelope(&self, envelope: &Envelope) -> StoreResult<()> {
+        let version = i64::try_from(envelope.version).map_err(|_| StoreError::CorruptRecord)?;
+        self.connection.execute(
+            REPLACE_ENVELOPE,
+            params![
+                envelope.id,
+                envelope.kind.as_str(),
+                version,
+                envelope.is_deleted,
+                envelope.modified_at,
+                envelope.wrapped_key.0.nonce,
+                envelope.wrapped_key.0.ciphertext,
+                envelope.payload.nonce,
+                envelope.payload.ciphertext,
+            ],
+        )?;
+        Ok(())
+    }
+
     fn get_vault_settings(&self) -> StoreResult<Option<VaultSettings>> {
         let query = format!("SELECT {SELECT_SETTINGS_COLUMNS} FROM vault_settings WHERE id = 1");
         self.connection
@@ -126,9 +162,13 @@ impl Store for SqliteStore {
 
     fn put_vault_settings(&self, settings: &VaultSettings) -> StoreResult<()> {
         let biometric = settings.biometric.as_ref();
+        let settings_version =
+            i64::try_from(settings.settings_version).map_err(|_| StoreError::CorruptRecord)?;
         self.connection.execute(
             REPLACE_VAULT_SETTINGS,
             params![
+                settings.vault_id,
+                settings_version,
                 settings.created_at,
                 settings.kdf_salt.as_bytes(),
                 settings.kdf_params.memory_kib,
@@ -144,6 +184,40 @@ impl Store for SqliteStore {
                 biometric.map(|b| b.wrapped_key.0.ciphertext.as_slice()),
             ],
         )?;
+        Ok(())
+    }
+
+    fn get_sync_baseline(&self, id: &str) -> StoreResult<Option<SyncBaseline>> {
+        let stored: Option<(i64, Vec<u8>)> = self
+            .connection
+            .query_row(
+                "SELECT version, payload_nonce FROM sync_baselines WHERE id = ?1",
+                params![id],
+                |row| Ok((row.get(0)?, row.get(1)?)),
+            )
+            .optional()?;
+        stored
+            .map(|(version, nonce)| {
+                Ok(SyncBaseline {
+                    version: u64::try_from(version).map_err(|_| StoreError::CorruptRecord)?,
+                    payload_nonce: nonce.try_into().map_err(|_| StoreError::CorruptRecord)?,
+                })
+            })
+            .transpose()
+    }
+
+    fn put_sync_baseline(&self, id: &str, baseline: &SyncBaseline) -> StoreResult<()> {
+        let version = i64::try_from(baseline.version).map_err(|_| StoreError::CorruptRecord)?;
+        self.connection.execute(
+            "INSERT OR REPLACE INTO sync_baselines (id, version, payload_nonce)
+             VALUES (?1, ?2, ?3)",
+            params![id, version, baseline.payload_nonce],
+        )?;
+        Ok(())
+    }
+
+    fn clear_sync_baselines(&self) -> StoreResult<()> {
+        self.connection.execute("DELETE FROM sync_baselines", [])?;
         Ok(())
     }
 }

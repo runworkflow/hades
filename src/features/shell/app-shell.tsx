@@ -8,6 +8,8 @@ import { useNavigationHistory } from "@/features/navigation/use-navigation-histo
 import { recentViewId } from "@/features/navigation/view-ids"
 import { useFolders } from "@/features/folders/use-folders"
 import { SecurityDialog } from "@/features/security/security-dialog"
+import { SyncDialog } from "@/features/sync/sync-dialog"
+import { useVaultSyncedEvent } from "@/features/sync/use-vault-synced-event"
 import { useActivityReporter } from "@/features/vault/use-activity-reporter"
 import { useLockVault } from "@/features/vault/use-vault"
 
@@ -17,9 +19,11 @@ import { Sidebar } from "./sidebar"
 export function AppShell() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isSecurityOpen, setIsSecurityOpen] = useState(false)
+  const [isSyncOpen, setIsSyncOpen] = useState(false)
   const navigation = useNavigationHistory(recentViewId)
   const lockVault = useLockVault()
   useActivityReporter()
+  useVaultSyncedEvent()
   const foldersQuery = useFolders()
   const folders = foldersQuery.data ?? []
   const items = useItems().data ?? []
@@ -60,6 +64,7 @@ export function AppShell() {
         onSelectView={navigation.goTo}
         onLock={() => lockVault.mutate()}
         onOpenSecurity={() => setIsSecurityOpen(true)}
+        onOpenSync={() => setIsSyncOpen(true)}
       />
       <main
         className={`mt-2 mr-2 mb-2 flex min-w-0 overflow-hidden rounded-pane bg-pane transition-[margin] duration-300 ease-out ${paneMarginClass}`}
@@ -86,6 +91,7 @@ export function AppShell() {
         isOpen={isSecurityOpen}
         onClose={() => setIsSecurityOpen(false)}
       />
+      <SyncDialog isOpen={isSyncOpen} onClose={() => setIsSyncOpen(false)} />
     </div>
   )
 }

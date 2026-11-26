@@ -8,6 +8,9 @@ import { FolderSection } from "@/features/folders/folder-section"
 import type { Folder } from "@/features/folders/folder-types"
 import { recentViewId } from "@/features/navigation/view-ids"
 
+import { SyncStatusLine } from "@/features/sync/sync-status-line"
+import { useSyncStatus } from "@/features/sync/use-sync"
+
 import { SidebarNavItem } from "./sidebar-nav-item"
 
 type SidebarProps = {
@@ -17,6 +20,7 @@ type SidebarProps = {
   onSelectView: (viewId: string) => void
   onLock: () => void
   onOpenSecurity: () => void
+  onOpenSync: () => void
 }
 
 export function Sidebar({
@@ -26,7 +30,9 @@ export function Sidebar({
   onSelectView,
   onLock,
   onOpenSecurity,
+  onOpenSync,
 }: SidebarProps) {
+  const syncStatus = useSyncStatus()
   const visibilityClasses = isOpen ? "opacity-100 delay-75" : "opacity-0"
 
   return (
@@ -59,10 +65,7 @@ export function Sidebar({
             isActive={false}
             onSelect={onLock}
           />
-          <div className="flex items-center gap-2 px-3.5 text-sm text-ink-muted">
-            <span className="size-2 rounded-full bg-success" />
-            Local sync up to date
-          </div>
+          <SyncStatusLine status={syncStatus.data} onOpen={onOpenSync} />
         </div>
       </div>
     </aside>

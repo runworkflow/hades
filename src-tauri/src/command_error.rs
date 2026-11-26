@@ -1,4 +1,4 @@
-use hades_core::{BiometricError, BlobError, StoreError, VaultError};
+use hades_core::{BiometricError, BlobError, StoreError, SyncError, VaultError};
 use serde::Serialize;
 
 const INTERNAL_MESSAGE: &str = "Something went wrong. Please try again.";
@@ -12,6 +12,10 @@ pub struct CommandError {
 impl CommandError {
     pub fn new(code: &'static str, message: String) -> Self {
         Self { code, message }
+    }
+
+    pub fn message(&self) -> &str {
+        &self.message
     }
 
     pub fn internal() -> Self {
@@ -93,6 +97,41 @@ impl From<VaultError> for CommandError {
             VaultError::Biometric(error) => biometric_error(error),
             VaultError::Blob(BlobError::Corrupt) => Self::new("file_damaged", message),
             VaultError::Blob(_) | VaultError::Crypto(_) | VaultError::Store(_) => Self::internal(),
+        }
+    }
+}
+
+impl From<SyncError> for CommandError {
+    fn from(error: SyncError) -> Self {
+        match error {
+            SyncError::Io(_) => Self::new(
+                "sync_folder_unavailable",
+                "Hades could not use the sync folder. Check that it is available.".to_string(),
+            ),
+            SyncError::DifferentVault => Self::new(
+                "sync_different_vault",
+                "That folder belongs to a different vault.".to_string(),
+            ),
+            SyncError::FolderHasNoVault => Self::new(
+                "sync_folder_empty",
+                "That folder does not contain a Hades vault.".to_string(),
+            ),
+            SyncError::VaultAlreadyExists => {
+                Self::new("vault_exists", "This Mac already has a vault.".to_string())
+            }
+            SyncError::UnsupportedFormat => Self::new(
+                "sync_newer_version",
+                "The sync folder was written by a newer version of Hades. Update Hades."
+                    .to_string(),
+            ),
+            SyncError::DamagedFile | SyncError::InvalidName => Self::new(
+                "sync_damaged",
+                "A file in the sync folder is damaged.".to_string(),
+            ),
+            SyncError::Vault(error) => error.into(),
+            SyncError::VaultNotCreated | SyncError::Store(_) | SyncError::Blob(_) => {
+                Self::internal()
+            }
         }
     }
 }
