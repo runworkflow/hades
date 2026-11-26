@@ -8,6 +8,7 @@ mod records;
 mod sealed;
 mod secret_key;
 mod store;
+mod sync;
 mod vault;
 
 pub use blobs::{
@@ -26,6 +27,7 @@ pub use secret_key::{KEY_LENGTH, SecretKey};
 pub use store::{
     Envelope, EnvelopeKind, SqliteStore, Store, StoreError, StoreResult, VaultSettings,
 };
+pub use sync::{ConflictWinner, MergeDecision, decide_merge};
 pub use vault::{
     AutoLockMonitor, AutoLockPolicy, BiometricEnrollment, BiometricError, BiometricProvider,
     LockReason, MINIMUM_PASSWORD_LENGTH, NewVault, RecoveryKey, UnlockThrottle, UnlockedVault,
