@@ -1,4 +1,5 @@
 use std::collections::BTreeMap;
+use std::fmt;
 
 use serde::{Deserialize, Serialize};
 use zeroize::Zeroizing;
@@ -31,7 +32,7 @@ pub struct ItemDetail {
     pub fields: Vec<ItemField>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct NewItem {
     pub folder_id: String,
     pub kind: ItemKind,
@@ -39,11 +40,34 @@ pub struct NewItem {
     pub fields: BTreeMap<String, String>,
 }
 
-#[derive(Debug, Clone)]
+impl fmt::Debug for NewItem {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("NewItem")
+            .field("folder_id", &self.folder_id)
+            .field("kind", &self.kind)
+            .field("name", &self.name)
+            .field("field_keys", &self.fields.keys().collect::<Vec<_>>())
+            .finish()
+    }
+}
+
+#[derive(Clone)]
 pub struct ItemUpdate {
     pub folder_id: String,
     pub name: String,
     pub fields: BTreeMap<String, String>,
+}
+
+impl fmt::Debug for ItemUpdate {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("ItemUpdate")
+            .field("folder_id", &self.folder_id)
+            .field("name", &self.name)
+            .field("field_keys", &self.fields.keys().collect::<Vec<_>>())
+            .finish()
+    }
 }
 
 #[derive(Serialize, Deserialize)]

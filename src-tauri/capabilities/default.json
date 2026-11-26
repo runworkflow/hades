@@ -4,8 +4,10 @@
   "description": "Capability for the main window",
   "windows": ["main"],
   "permissions": [
-    "core:default",
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
     "core:window:allow-start-dragging",
+    "core:window:allow-internal-toggle-maximize",
     "allow-get-vault-status",
     "allow-create-vault",
     "allow-unlock-with-password",
