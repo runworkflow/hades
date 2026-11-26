@@ -37,7 +37,7 @@ const APP_COMMANDS: &[&str] = &[
     "join_from_sync_folder",
 ];
 
-const MINIMUM_MACOS_VERSION: &str = "11.0";
+const MINIMUM_MACOS_VERSION: &str = "13.0";
 const SWIFT_FRAMEWORKS: &[&str] = &[
     "Foundation",
     "AppKit",
