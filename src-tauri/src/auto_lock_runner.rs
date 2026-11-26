@@ -17,7 +17,7 @@ pub fn start(app: AppHandle) {
             thread::sleep(CHECK_INTERVAL);
             let vault = app.state::<AppVault>();
             if let Some(reason) = due_lock_reason(&vault) {
-                lock_if_unlocked(&app, &vault, reason);
+                lock_now(&app, &vault, reason);
             }
         }
     });
@@ -31,7 +31,7 @@ fn due_lock_reason(vault: &AppVault) -> Option<LockReason> {
     monitor.check(current_unix_millis())
 }
 
-fn lock_if_unlocked(app: &AppHandle, vault: &AppVault, reason: LockReason) {
+pub fn lock_now(app: &AppHandle, vault: &AppVault, reason: LockReason) {
     let mut session = vault.session.lock().unwrap_or_else(PoisonError::into_inner);
     if session.unlocked_vault().is_none() {
         return;

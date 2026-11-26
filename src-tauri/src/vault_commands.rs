@@ -1,6 +1,6 @@
-use std::sync::MutexGuard;
+use std::sync::{MutexGuard, PoisonError};
 
-use hades_core::{SqliteStore, VaultSession, VaultStatus};
+use hades_core::{SqliteStore, VaultError, VaultSession, VaultStatus};
 use serde::Serialize;
 use tauri::State;
 use zeroize::Zeroizing;
@@ -31,6 +31,42 @@ impl From<VaultStatus> for VaultStatusResponse {
 #[serde(rename_all = "camelCase")]
 pub struct CreatedVault {
     recovery_key: String,
+}
+
+pub fn lock_session_for_attempt(vault: &AppVault) -> MutexGuard<'_, VaultSession<SqliteStore>> {
+    vault.session.lock().unwrap_or_else(PoisonError::into_inner)
+}
+
+pub fn throttled<T>(
+    vault: &AppVault,
+    attempt: impl FnOnce() -> Result<T, VaultError>,
+) -> Result<T, CommandError> {
+    if let Ok(throttle) = vault.unlock_throttle.lock()
+        && let Err(remaining_ms) = throttle.check(current_unix_millis())
+    {
+        return Err(VaultError::TooManyAttempts {
+            retry_after_seconds: remaining_ms.unsigned_abs().div_ceil(1000),
+        }
+        .into());
+    }
+
+    let result = attempt();
+    if let Ok(mut throttle) = vault.unlock_throttle.lock() {
+        match &result {
+            Ok(_) => throttle.record_success(),
+            Err(VaultError::IncorrectPassword | VaultError::IncorrectRecoveryKey) => {
+                throttle.record_failure(current_unix_millis());
+            }
+            Err(_) => {}
+        }
+    }
+    result.map_err(CommandError::from)
+}
+
+pub fn record_unlock_success(vault: &AppVault) {
+    if let Ok(mut throttle) = vault.unlock_throttle.lock() {
+        throttle.record_success();
+    }
 }
 
 pub fn lock_session(
@@ -70,7 +106,9 @@ pub fn unlock_with_password(
 ) -> Result<(), CommandError> {
     let password = Zeroizing::new(password);
     record_activity(&vault);
-    lock_session(&vault)?.unlock_with_password(&password)?;
+    throttled(&vault, || {
+        lock_session_for_attempt(&vault).unlock_with_password(&password)
+    })?;
     vault.remove_orphan_blobs();
     Ok(())
 }
@@ -82,7 +120,9 @@ pub fn unlock_with_recovery_key(
 ) -> Result<(), CommandError> {
     let recovery_key = Zeroizing::new(recovery_key);
     record_activity(&vault);
-    lock_session(&vault)?.unlock_with_recovery_key(&recovery_key)?;
+    throttled(&vault, || {
+        lock_session_for_attempt(&vault).unlock_with_recovery_key(&recovery_key)
+    })?;
     vault.remove_orphan_blobs();
     Ok(())
 }

@@ -4,6 +4,10 @@ version = "0.1.0"
 description = "Hades secret manager"
 edition = "2024"
 
+[[bin]]
+name = "Hades"
+path = "src/main.rs"
+
 [lib]
 name = "hades_app_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]

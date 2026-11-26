@@ -36,6 +36,8 @@ pub enum VaultError {
     InvalidField,
     #[error("the item type is not valid")]
     InvalidItemKind,
+    #[error("too many wrong attempts, try again in {retry_after_seconds} seconds")]
+    TooManyAttempts { retry_after_seconds: u64 },
     #[error("Touch ID unlock is not turned on")]
     BiometricsNotEnabled,
     #[error(transparent)]

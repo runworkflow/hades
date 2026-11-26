@@ -4,7 +4,9 @@ use std::os::unix::fs::{DirBuilderExt, PermissionsExt};
 use std::path::Path;
 use std::sync::Mutex;
 
-use hades_core::{AutoLockMonitor, AutoLockPolicy, FileBlobStore, SqliteStore, VaultSession};
+use hades_core::{
+    AutoLockMonitor, AutoLockPolicy, FileBlobStore, SqliteStore, UnlockThrottle, VaultSession,
+};
 
 use crate::clock::current_unix_millis;
 use crate::secret_clipboard::SecretClipboard;
@@ -17,6 +19,7 @@ pub struct AppVault {
     pub session: Mutex<VaultSession<SqliteStore>>,
     pub blobs: FileBlobStore,
     pub auto_lock: Mutex<AutoLockMonitor>,
+    pub unlock_throttle: Mutex<UnlockThrottle>,
     pub clipboard: SecretClipboard,
 }
 
@@ -41,6 +44,7 @@ impl AppVault {
                 AutoLockPolicy::default(),
                 current_unix_millis(),
             )),
+            unlock_throttle: Mutex::new(UnlockThrottle::default()),
             clipboard: SecretClipboard::default(),
         })
     }

@@ -41,6 +41,15 @@ fn biometric_error(error: BiometricError) -> CommandError {
     }
 }
 
+fn too_many_attempts_message(retry_after_seconds: u64) -> String {
+    let noun = if retry_after_seconds == 1 {
+        "second"
+    } else {
+        "seconds"
+    };
+    format!("Too many wrong attempts. Try again in {retry_after_seconds} {noun}.")
+}
+
 fn file_too_large_message(maximum_bytes: u64) -> String {
     let megabytes = maximum_bytes / (1024 * 1024);
     format!("This file is larger than {megabytes} MiB and cannot be added.")
@@ -74,6 +83,12 @@ impl From<VaultError> for CommandError {
             VaultError::Blob(BlobError::TooLarge { maximum_bytes }) => {
                 Self::new("file_too_large", file_too_large_message(maximum_bytes))
             }
+            VaultError::TooManyAttempts {
+                retry_after_seconds,
+            } => Self::new(
+                "too_many_attempts",
+                too_many_attempts_message(retry_after_seconds),
+            ),
             VaultError::BiometricsNotEnabled => Self::new("biometrics_not_enabled", message),
             VaultError::Biometric(error) => biometric_error(error),
             VaultError::Blob(BlobError::Corrupt) => Self::new("file_damaged", message),

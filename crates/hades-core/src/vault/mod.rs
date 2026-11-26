@@ -6,6 +6,7 @@ mod lifecycle;
 mod password;
 mod recovery_key;
 mod session;
+mod unlock_throttle;
 mod unlocked_vault;
 
 pub use auto_lock::{AutoLockMonitor, AutoLockPolicy, LockReason};
@@ -15,4 +16,5 @@ pub use lifecycle::{NewVault, create_vault, unlock_with_password, unlock_with_re
 pub use password::MINIMUM_PASSWORD_LENGTH;
 pub use recovery_key::RecoveryKey;
 pub use session::{VaultSession, VaultStatus};
+pub use unlock_throttle::UnlockThrottle;
 pub use unlocked_vault::UnlockedVault;

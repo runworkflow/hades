@@ -8,6 +8,7 @@ mod file_commands;
 mod folder_commands;
 mod item_commands;
 mod macos_biometrics;
+mod macos_system_events;
 mod secret_clipboard;
 mod security_commands;
 mod vault_commands;
@@ -24,6 +25,7 @@ pub fn run() {
             let data_directory = app.path().app_data_dir()?;
             app.manage(AppVault::open(&data_directory)?);
             auto_lock_runner::start(app.handle().clone());
+            macos_system_events::start(app.handle().clone());
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![

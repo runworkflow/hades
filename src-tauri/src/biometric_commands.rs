@@ -6,7 +6,9 @@ use zeroize::Zeroizing;
 use crate::app_vault::AppVault;
 use crate::command_error::CommandError;
 use crate::macos_biometrics::MacosBiometrics;
-use crate::vault_commands::{lock_session, record_activity};
+use crate::vault_commands::{
+    lock_session, lock_session_for_attempt, record_activity, record_unlock_success, throttled,
+};
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -39,8 +41,16 @@ pub fn enable_biometric_unlock(
 ) -> Result<bool, CommandError> {
     let current_password = Zeroizing::new(current_password);
     record_activity(&vault);
-    let result = lock_session(&vault)?.enable_biometric_unlock(&current_password, &MacosBiometrics);
-    finish_with_cancel_as_false(result)
+    let outcome = throttled(&vault, || {
+        match lock_session_for_attempt(&vault)
+            .enable_biometric_unlock(&current_password, &MacosBiometrics)
+        {
+            Ok(()) => Ok(true),
+            Err(VaultError::Biometric(BiometricError::Cancelled)) => Ok(false),
+            Err(error) => Err(error),
+        }
+    })?;
+    Ok(outcome)
 }
 
 #[tauri::command(async)]
@@ -55,6 +65,7 @@ pub fn unlock_with_biometrics(vault: State<'_, AppVault>) -> Result<bool, Comman
     let result = lock_session(&vault)?.unlock_with_biometrics(&MacosBiometrics);
     let unlocked = finish_with_cancel_as_false(result)?;
     if unlocked {
+        record_unlock_success(&vault);
         vault.remove_orphan_blobs();
     }
     Ok(unlocked)

@@ -1,14 +1,25 @@
+import { useEffect } from "react"
 import { FingerprintIcon } from "@solar-icons/react/linear"
 
 import { FormError } from "@/components/form-error"
 
 import { useBiometricStatus, useUnlockWithBiometrics } from "./use-biometrics"
 
+let hasPromptedSinceLaunch = false
+
 export function TouchIdUnlockButton() {
   const status = useBiometricStatus()
   const unlock = useUnlockWithBiometrics()
+  const { mutate: startUnlock } = unlock
+  const isReady = Boolean(status.data?.isAvailable && status.data.isEnabled)
 
-  if (!status.data?.isAvailable || !status.data.isEnabled) return null
+  useEffect(() => {
+    if (!isReady || hasPromptedSinceLaunch) return
+    hasPromptedSinceLaunch = true
+    startUnlock()
+  }, [isReady, startUnlock])
+
+  if (!isReady) return null
 
   return (
     <div className="flex w-full flex-col gap-2">

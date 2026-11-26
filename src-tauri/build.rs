@@ -33,7 +33,13 @@ const APP_COMMANDS: &[&str] = &[
 ];
 
 const MINIMUM_MACOS_VERSION: &str = "11.0";
-const SWIFT_FRAMEWORKS: &[&str] = &["Foundation", "Security", "LocalAuthentication", "CryptoKit"];
+const SWIFT_FRAMEWORKS: &[&str] = &[
+    "Foundation",
+    "AppKit",
+    "Security",
+    "LocalAuthentication",
+    "CryptoKit",
+];
 
 fn swift_target() -> String {
     let architecture = match env::var("CARGO_CFG_TARGET_ARCH").as_deref() {
@@ -69,33 +75,34 @@ fn swift_runtime_library_paths(target: &str) -> Vec<String> {
 fn build_swift_bridge() {
     let manifest_directory = PathBuf::from(env::var("CARGO_MANIFEST_DIR").expect("manifest dir"));
     let output_directory = PathBuf::from(env::var("OUT_DIR").expect("output dir"));
-    let source = manifest_directory.join("swift").join("biometrics.swift");
-    let library = output_directory.join("libhadesbiometrics.a");
+    let swift_directory = manifest_directory.join("swift");
+    let mut sources: Vec<PathBuf> = std::fs::read_dir(&swift_directory)
+        .expect("the swift folder is missing")
+        .filter_map(|entry| entry.ok().map(|entry| entry.path()))
+        .filter(|path| {
+            path.extension()
+                .is_some_and(|extension| extension == "swift")
+        })
+        .collect();
+    sources.sort();
+    let library = output_directory.join("libhadesnative.a");
 
     let status = Command::new("swiftc")
         .args(["-O", "-parse-as-library", "-emit-library", "-static"])
-        .args([
-            "-module-name",
-            "HadesBiometrics",
-            "-target",
-            &swift_target(),
-        ])
-        .arg(&source)
+        .args(["-module-name", "HadesNative", "-target", &swift_target()])
+        .args(&sources)
         .arg("-o")
         .arg(&library)
         .status()
         .expect("swiftc is required to build the macOS Touch ID bridge");
-    assert!(
-        status.success(),
-        "the Swift Touch ID bridge failed to build"
-    );
+    assert!(status.success(), "the Swift bridge failed to build");
 
-    println!("cargo:rerun-if-changed=swift/biometrics.swift");
+    println!("cargo:rerun-if-changed=swift");
     println!(
         "cargo:rustc-link-search=native={}",
         output_directory.display()
     );
-    println!("cargo:rustc-link-lib=static=hadesbiometrics");
+    println!("cargo:rustc-link-lib=static=hadesnative");
     for path in swift_runtime_library_paths(&swift_target()) {
         println!("cargo:rustc-link-search=native={path}");
     }

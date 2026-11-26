@@ -28,7 +28,7 @@ pub use store::{
 };
 pub use vault::{
     AutoLockMonitor, AutoLockPolicy, BiometricEnrollment, BiometricError, BiometricProvider,
-    LockReason, MINIMUM_PASSWORD_LENGTH, NewVault, RecoveryKey, UnlockedVault, VaultError,
-    VaultResult, VaultSession, VaultStatus, create_vault, unlock_with_password,
+    LockReason, MINIMUM_PASSWORD_LENGTH, NewVault, RecoveryKey, UnlockThrottle, UnlockedVault,
+    VaultError, VaultResult, VaultSession, VaultStatus, create_vault, unlock_with_password,
     unlock_with_recovery_key,
 };

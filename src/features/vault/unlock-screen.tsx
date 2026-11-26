@@ -47,7 +47,7 @@ export function UnlockScreen() {
           label={isRecoveryKey ? "Recovery key" : "Master password"}
           type={isRecoveryKey ? "text" : "password"}
           placeholder={isRecoveryKey ? "XXXX-XXXX-XXXX-XXXX" : undefined}
-          autoFocus
+          autoFocus={isRecoveryKey}
           autoComplete="off"
           spellCheck={false}
           value={secret}

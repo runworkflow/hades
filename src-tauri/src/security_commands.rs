@@ -4,7 +4,7 @@ use zeroize::Zeroizing;
 
 use crate::app_vault::AppVault;
 use crate::command_error::CommandError;
-use crate::vault_commands::{lock_session, record_activity};
+use crate::vault_commands::{lock_session_for_attempt, record_activity, throttled};
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -21,7 +21,9 @@ pub fn change_password(
     let current_password = Zeroizing::new(current_password);
     let new_password = Zeroizing::new(new_password);
     record_activity(&vault);
-    lock_session(&vault)?.change_password(&current_password, &new_password)?;
+    throttled(&vault, || {
+        lock_session_for_attempt(&vault).change_password(&current_password, &new_password)
+    })?;
     Ok(())
 }
 
@@ -32,7 +34,9 @@ pub fn create_new_recovery_key(
 ) -> Result<NewRecoveryKey, CommandError> {
     let current_password = Zeroizing::new(current_password);
     record_activity(&vault);
-    let recovery_key = lock_session(&vault)?.regenerate_recovery_key(&current_password)?;
+    let recovery_key = throttled(&vault, || {
+        lock_session_for_attempt(&vault).regenerate_recovery_key(&current_password)
+    })?;
     Ok(NewRecoveryKey {
         recovery_key: recovery_key.to_display_text().to_string(),
     })

@@ -5,6 +5,8 @@ const THIRTY_SECONDS_MS: i64 = 30 * 1000;
 pub enum LockReason {
     Idle,
     Sleep,
+    ScreenLock,
+    UserSwitch,
 }
 
 impl LockReason {
@@ -12,6 +14,8 @@ impl LockReason {
         match self {
             Self::Idle => "idle",
             Self::Sleep => "sleep",
+            Self::ScreenLock => "screen_lock",
+            Self::UserSwitch => "user_switch",
         }
     }
 }
