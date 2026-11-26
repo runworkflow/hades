@@ -2,7 +2,7 @@ import type { ButtonHTMLAttributes } from "react"
 
 const sizeClasses = {
   medium: "size-9 text-ink-muted hover:bg-raised hover:text-ink",
-  large: "size-12 bg-raised text-ink hover:bg-raised-hover",
+  large: "size-9 bg-raised text-ink hover:bg-raised-hover",
 }
 
 type IconButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {

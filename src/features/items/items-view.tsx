@@ -3,45 +3,32 @@ import { useState } from "react"
 import type { Folder } from "@/features/folders/folder-types"
 
 import type { VaultItem } from "./item-types"
-import { ItemsHeader, type FolderActions } from "./items-header"
 import { ItemsTable } from "./items-table"
 import { ItemsTabs, type ItemsTab } from "./items-tabs"
 import { filterItemsBySearch } from "./select-items"
 
 type ItemsViewProps = {
-  title: string
+  searchText: string
   items: VaultItem[]
   folders: Folder[]
   openItemId: string | null
   onOpenItem: (itemId: string) => void
-  onNewItem: () => void
   onItemsDeleted: (itemIds: string[]) => void
-  folderActions: FolderActions | null
 }
 
 export function ItemsView({
-  title,
+  searchText,
   items,
   folders,
   openItemId,
   onOpenItem,
-  onNewItem,
   onItemsDeleted,
-  folderActions,
 }: ItemsViewProps) {
-  const [searchText, setSearchText] = useState("")
   const [activeTab, setActiveTab] = useState<ItemsTab>("items")
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col px-8 pt-6">
-      <ItemsHeader
-        title={title}
-        searchText={searchText}
-        onSearchChange={setSearchText}
-        onNewItem={onNewItem}
-        folderActions={folderActions}
-      />
-      <div className="my-6">
+    <section className="flex min-h-0 flex-1 flex-col px-8 pt-2">
+      <div className="mb-6">
         <ItemsTabs activeTab={activeTab} onChange={setActiveTab} />
       </div>
       {activeTab === "items" ? (

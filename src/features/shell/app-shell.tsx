@@ -53,7 +53,7 @@ export function AppShell() {
       <IconButton
         label="Toggle sidebar"
         onClick={() => setIsSidebarOpen((isOpen) => !isOpen)}
-        className="absolute top-3 left-23 z-20"
+        className="absolute top-4 left-23 z-20"
       >
         <SidebarMinimalisticIcon size={20} />
       </IconButton>
@@ -71,15 +71,17 @@ export function AppShell() {
       >
         <ItemsWorkspace
           key={viewId}
-          header={
+          renderHeader={(content) => (
             <PaneHeader
               isSidebarOpen={isSidebarOpen}
               canGoBack={navigation.canGoBack}
               canGoForward={navigation.canGoForward}
               onGoBack={navigation.goBack}
               onGoForward={navigation.goForward}
-            />
-          }
+            >
+              {content}
+            </PaneHeader>
+          )}
           title={title}
           viewId={viewId}
           folders={folders}

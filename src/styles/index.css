@@ -17,7 +17,8 @@
   --color-kind-ssh-key: #3fd35a;
   --color-kind-file: #cfcfcf;
   --color-kind-note: #b793ff;
-  --radius-pane: 22px;
+  --radius-window: 15px;
+  --radius-pane: calc(var(--radius-window) - 0.5rem);
   --font-sans:
     -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
 }

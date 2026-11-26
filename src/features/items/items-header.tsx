@@ -24,12 +24,12 @@ export function ItemsHeader({
   folderActions,
 }: ItemsHeaderProps) {
   return (
-    <div className="flex items-center gap-4">
+    <div className="ml-2.5 flex min-w-0 flex-1 items-center gap-3">
       <IconButton label="New item" size="large" onClick={onNewItem}>
-        <AddIcon size={22} />
+        <AddIcon size={18} />
       </IconButton>
-      <span className="h-7 w-px bg-white/15" />
-      <h1 className="text-3xl font-bold tracking-tight whitespace-nowrap">
+      <span className="h-5 w-px bg-white/15" />
+      <h1 className="text-xl font-semibold tracking-tight whitespace-nowrap">
         {title}
       </h1>
       {folderActions && (

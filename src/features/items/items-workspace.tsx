@@ -6,12 +6,13 @@ import type { Folder } from "@/features/folders/folder-types"
 
 import { ItemDetailPanel } from "./item-detail-panel"
 import type { VaultItem } from "./item-types"
+import { ItemsHeader } from "./items-header"
 import { ItemsView } from "./items-view"
 import { NewItemDialog } from "./new-item-dialog"
 import { selectItemsForView } from "./select-items"
 
 type ItemsWorkspaceProps = {
-  header: ReactNode
+  renderHeader: (content: ReactNode) => ReactNode
   title: string
   viewId: string
   folders: Folder[]
@@ -20,7 +21,7 @@ type ItemsWorkspaceProps = {
 }
 
 export function ItemsWorkspace({
-  header,
+  renderHeader,
   title,
   viewId,
   folders,
@@ -28,6 +29,7 @@ export function ItemsWorkspace({
   onFolderDeleted,
 }: ItemsWorkspaceProps) {
   const [openItemId, setOpenItemId] = useState<string | null>(null)
+  const [searchText, setSearchText] = useState("")
   const [isNewItemOpen, setIsNewItemOpen] = useState(false)
   const [isEditFolderOpen, setIsEditFolderOpen] = useState(false)
   const [isDeleteFolderOpen, setIsDeleteFolderOpen] = useState(false)
@@ -38,25 +40,31 @@ export function ItemsWorkspace({
   return (
     <div className="flex min-h-0 min-w-0 flex-1">
       <div className="flex min-w-0 flex-1 flex-col">
-        {header}
+        {renderHeader(
+          <ItemsHeader
+            title={title}
+            searchText={searchText}
+            onSearchChange={setSearchText}
+            onNewItem={() => setIsNewItemOpen(true)}
+            folderActions={
+              currentFolder
+                ? {
+                    onEdit: () => setIsEditFolderOpen(true),
+                    onDelete: () => setIsDeleteFolderOpen(true),
+                  }
+                : null
+            }
+          />
+        )}
         <ItemsView
-          title={title}
+          searchText={searchText}
           items={selectItemsForView(items, viewId)}
           folders={folders}
           openItemId={openItemId}
           onOpenItem={setOpenItemId}
-          onNewItem={() => setIsNewItemOpen(true)}
           onItemsDeleted={(itemIds) => {
             if (openItemId && itemIds.includes(openItemId)) setOpenItemId(null)
           }}
-          folderActions={
-            currentFolder
-              ? {
-                  onEdit: () => setIsEditFolderOpen(true),
-                  onDelete: () => setIsDeleteFolderOpen(true),
-                }
-              : null
-          }
         />
       </div>
       {openItemId && (

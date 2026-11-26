@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import { AltArrowLeftIcon, AltArrowRightIcon } from "@solar-icons/react/linear"
 
 import { IconButton } from "@/components/icon-button"
@@ -8,6 +9,7 @@ type PaneHeaderProps = {
   canGoForward: boolean
   onGoBack: () => void
   onGoForward: () => void
+  children?: ReactNode
 }
 
 export function PaneHeader({
@@ -16,12 +18,13 @@ export function PaneHeader({
   canGoForward,
   onGoBack,
   onGoForward,
+  children,
 }: PaneHeaderProps) {
   const offsetClass = isSidebarOpen ? "ml-5" : "ml-34"
 
   return (
     <div
-      className={`relative z-20 flex h-11 shrink-0 items-center gap-1.5 transition-[margin] duration-300 ease-out ${offsetClass}`}
+      className={`relative z-20 mr-2 flex h-13 shrink-0 items-center gap-1.5 transition-[margin] duration-300 ease-out ${offsetClass}`}
     >
       <IconButton label="Back" disabled={!canGoBack} onClick={onGoBack}>
         <AltArrowLeftIcon size={20} />
@@ -33,6 +36,7 @@ export function PaneHeader({
       >
         <AltArrowRightIcon size={20} />
       </IconButton>
+      {children}
     </div>
   )
 }
