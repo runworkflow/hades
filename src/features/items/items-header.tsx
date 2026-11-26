@@ -1,6 +1,7 @@
 import { AddIcon, PenIcon, TrashBinTrashIcon } from "@solar-icons/react/linear"
 
 import { IconButton } from "@/components/icon-button"
+import { PrimaryButton } from "@/components/primary-button"
 import { SearchField } from "@/components/search-field"
 
 export type FolderActions = {
@@ -25,10 +26,6 @@ export function ItemsHeader({
 }: ItemsHeaderProps) {
   return (
     <div className="ml-2.5 flex min-w-0 flex-1 items-center gap-3">
-      <IconButton label="New item" size="large" onClick={onNewItem}>
-        <AddIcon size={18} />
-      </IconButton>
-      <span className="h-5 w-px bg-white/15" />
       <h1 className="text-xl font-semibold tracking-tight whitespace-nowrap">
         {title}
       </h1>
@@ -47,6 +44,10 @@ export function ItemsHeader({
         onChange={onSearchChange}
         className="ml-auto"
       />
+      <PrimaryButton size="compact" onClick={onNewItem}>
+        <AddIcon size={16} />
+        New item
+      </PrimaryButton>
     </div>
   )
 }
