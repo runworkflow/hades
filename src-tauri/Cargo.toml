@@ -2,6 +2,8 @@
 name = "hades-app"
 version = "0.1.0"
 description = "Hades secret manager"
+license = "Apache-2.0"
+repository = "https://github.com/runworkflow/hades"
 edition = "2024"
 
 [[bin]]
