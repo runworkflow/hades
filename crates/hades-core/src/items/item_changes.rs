@@ -3,9 +3,10 @@ use zeroize::Zeroizing;
 use crate::error::CryptoError;
 use crate::records::{clean_name, seal_record};
 use crate::store::{Envelope, EnvelopeKind, Store};
-use crate::vault::{UnlockedVault, VaultResult};
+use crate::vault::{UnlockedVault, VaultError, VaultResult};
 
 use super::item::{ItemSummary, ItemUpdate, MAX_ITEM_NAME_LENGTH};
+use super::item_kind::ItemKind;
 use super::item_service::{check_fields, check_folder_exists, find_item_envelope, read_data};
 
 const DELETED_PAYLOAD: &[u8] = b"{}";
@@ -64,6 +65,9 @@ pub fn update_item<S: Store>(
     let name = clean_name(&update.name, MAX_ITEM_NAME_LENGTH)?;
     check_folder_exists(store, &update.folder_id)?;
     check_fields(data.kind, &update.fields)?;
+    if data.kind == ItemKind::File && !update.fields.is_empty() {
+        return Err(VaultError::InvalidField);
+    }
 
     for (key, value) in update.fields {
         data.fields.insert(key, Zeroizing::new(value));

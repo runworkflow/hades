@@ -21,6 +21,10 @@ export const itemApi = {
   remove: (itemId: string) => callCommand<void>("delete_item", { itemId }),
   removeMany: (itemIds: string[]) =>
     callCommand<number>("delete_items", { itemIds }),
+  importFile: (folderId: string) =>
+    callCommand<VaultItem | null>("import_file", { folderId }),
+  exportFile: (itemId: string) =>
+    callCommand<boolean>("export_file", { itemId }),
   moveMany: (itemIds: string[], folderId: string) =>
     callCommand<number>("move_items", { itemIds, folderId }),
 }

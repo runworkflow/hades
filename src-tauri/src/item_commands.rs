@@ -127,6 +127,7 @@ pub fn update_item(
 #[tauri::command(async)]
 pub fn delete_item(vault: State<'_, AppVault>, item_id: String) -> Result<(), CommandError> {
     lock_session(&vault)?.delete_item(&item_id, current_unix_millis())?;
+    vault.remove_orphan_blobs();
     Ok(())
 }
 
@@ -135,7 +136,9 @@ pub fn delete_items(
     vault: State<'_, AppVault>,
     item_ids: Vec<String>,
 ) -> Result<usize, CommandError> {
-    Ok(lock_session(&vault)?.delete_items(&item_ids, current_unix_millis())?)
+    let deleted_count = lock_session(&vault)?.delete_items(&item_ids, current_unix_millis())?;
+    vault.remove_orphan_blobs();
+    Ok(deleted_count)
 }
 
 #[tauri::command(async)]

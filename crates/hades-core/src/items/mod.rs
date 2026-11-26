@@ -1,3 +1,4 @@
+mod file_items;
 mod item;
 mod item_bulk;
 mod item_changes;
@@ -5,6 +6,7 @@ mod item_kind;
 mod item_service;
 mod session_items;
 
+pub use file_items::clean_file_name;
 pub use item::{
     ItemDetail, ItemField, ItemSummary, ItemUpdate, MAX_FIELD_LENGTH, MAX_ITEM_NAME_LENGTH, NewItem,
 };

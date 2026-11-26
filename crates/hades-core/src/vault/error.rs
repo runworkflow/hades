@@ -1,5 +1,6 @@
 use thiserror::Error;
 
+use crate::blobs::BlobError;
 use crate::error::CryptoError;
 use crate::store::StoreError;
 
@@ -33,6 +34,8 @@ pub enum VaultError {
     InvalidField,
     #[error("the item type is not valid")]
     InvalidItemKind,
+    #[error(transparent)]
+    Blob(#[from] BlobError),
     #[error(transparent)]
     Crypto(#[from] CryptoError),
     #[error(transparent)]

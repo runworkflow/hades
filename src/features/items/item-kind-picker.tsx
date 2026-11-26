@@ -1,16 +1,18 @@
 import { creatableItemKinds } from "./item-field-specs"
 import { itemKinds } from "./item-kinds"
-import type { CreatableItemKind } from "./item-types"
+import type { ItemKind } from "./item-types"
+
+const pickableKinds: ItemKind[] = [...creatableItemKinds, "file"]
 
 type ItemKindPickerProps = {
-  selected: CreatableItemKind
-  onSelect: (kind: CreatableItemKind) => void
+  selected: ItemKind
+  onSelect: (kind: ItemKind) => void
 }
 
 export function ItemKindPicker({ selected, onSelect }: ItemKindPickerProps) {
   return (
     <div className="flex flex-wrap gap-2">
-      {creatableItemKinds.map((kind) => {
+      {pickableKinds.map((kind) => {
         const { label, icon: KindIcon } = itemKinds[kind]
         const stateClasses =
           kind === selected

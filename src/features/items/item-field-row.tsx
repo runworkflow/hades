@@ -7,6 +7,7 @@ import {
 
 import { FormError } from "@/components/form-error"
 import { IconButton } from "@/components/icon-button"
+import { formatFileSize } from "@/lib/format-file-size"
 
 import { getFieldSpec } from "./item-field-specs"
 import type { ItemFieldView, ItemKind } from "./item-types"
@@ -27,9 +28,13 @@ export function ItemFieldRow({ itemId, kind, field }: ItemFieldRowProps) {
 
   const revealedValue = reveal.data
   const isHidden = field.isSecret && revealedValue === undefined
+  const plainValue =
+    kind === "file" && field.key === "size"
+      ? formatFileSize(Number(field.value))
+      : (field.value ?? "")
   const displayValue = field.isSecret
     ? (revealedValue ?? maskedValue)
-    : (field.value ?? "")
+    : plainValue
   const textClasses = spec?.isMultiline && !isHidden ? "font-mono text-sm" : ""
   const errorMessage = reveal.error?.message ?? copy.error?.message
 

@@ -7,12 +7,14 @@ import { SelectField } from "@/components/select-field"
 import { TextField } from "@/components/text-field"
 import type { Folder } from "@/features/folders/folder-types"
 
+import { ImportFileForm } from "./import-file-form"
 import { ItemFieldsInputs } from "./item-fields-inputs"
 import { ItemKindPicker } from "./item-kind-picker"
-import type { CreatableItemKind, VaultItem } from "./item-types"
+import type { CreatableItemKind, ItemKind, VaultItem } from "./item-types"
 import { useCreateItem } from "./use-items"
 
 type NewItemFormProps = {
+  kind: CreatableItemKind
   folders: Folder[]
   defaultFolderId: string
   onClose: () => void
@@ -20,21 +22,16 @@ type NewItemFormProps = {
 }
 
 function NewItemForm({
+  kind,
   folders,
   defaultFolderId,
   onClose,
   onCreated,
 }: NewItemFormProps) {
-  const [kind, setKind] = useState<CreatableItemKind>("password")
   const [name, setName] = useState("")
   const [folderId, setFolderId] = useState(defaultFolderId)
   const [fields, setFields] = useState<Record<string, string>>({})
   const createItem = useCreateItem()
-
-  function changeKind(nextKind: CreatableItemKind) {
-    setKind(nextKind)
-    setFields({})
-  }
 
   function setField(key: string, value: string) {
     setFields((current) => ({ ...current, [key]: value }))
@@ -55,7 +52,6 @@ function NewItemForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <ItemKindPicker selected={kind} onSelect={changeKind} />
       <TextField
         label="Name"
         autoFocus
@@ -96,6 +92,23 @@ function NewItemForm({
   )
 }
 
+type NewItemContentProps = Omit<NewItemFormProps, "kind">
+
+function NewItemContent(props: NewItemContentProps) {
+  const [kind, setKind] = useState<ItemKind>("password")
+
+  return (
+    <div className="flex flex-col gap-4">
+      <ItemKindPicker selected={kind} onSelect={setKind} />
+      {kind === "file" ? (
+        <ImportFileForm {...props} />
+      ) : (
+        <NewItemForm key={kind} kind={kind} {...props} />
+      )}
+    </div>
+  )
+}
+
 type NewItemDialogProps = {
   isOpen: boolean
   folders: Folder[]
@@ -116,7 +129,7 @@ export function NewItemDialog({
   return (
     <Modal isOpen={isOpen} title="New item" onClose={onClose}>
       {hasFolders ? (
-        <NewItemForm
+        <NewItemContent
           folders={folders}
           defaultFolderId={currentFolderId ?? folders[0].id}
           onClose={onClose}

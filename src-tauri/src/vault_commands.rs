@@ -39,7 +39,7 @@ pub fn lock_session(
     vault.session.lock().map_err(|_| CommandError::internal())
 }
 
-fn record_activity(vault: &AppVault) {
+pub fn record_activity(vault: &AppVault) {
     if let Ok(mut monitor) = vault.auto_lock.lock() {
         monitor.record_activity(current_unix_millis());
     }
@@ -71,6 +71,7 @@ pub fn unlock_with_password(
     let password = Zeroizing::new(password);
     record_activity(&vault);
     lock_session(&vault)?.unlock_with_password(&password)?;
+    vault.remove_orphan_blobs();
     Ok(())
 }
 
@@ -82,6 +83,7 @@ pub fn unlock_with_recovery_key(
     let recovery_key = Zeroizing::new(recovery_key);
     record_activity(&vault);
     lock_session(&vault)?.unlock_with_recovery_key(&recovery_key)?;
+    vault.remove_orphan_blobs();
     Ok(())
 }
 

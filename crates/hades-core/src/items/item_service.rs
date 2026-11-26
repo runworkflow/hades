@@ -21,44 +21,56 @@ pub fn create_item<S: Store>(
     new_item: NewItem,
     now_ms: i64,
 ) -> VaultResult<ItemSummary> {
+    if new_item.kind == ItemKind::File {
+        return Err(VaultError::InvalidItemKind);
+    }
     let name = clean_name(&new_item.name, MAX_ITEM_NAME_LENGTH)?;
     check_folder_exists(store, &new_item.folder_id)?;
     let fields = clean_fields(new_item.kind, new_item.fields)?;
-    let id = new_record_id();
 
     let data = ItemData {
-        name: name.clone(),
+        name,
         kind: new_item.kind,
-        folder_id: new_item.folder_id.clone(),
+        folder_id: new_item.folder_id,
         fields,
         created_at: now_ms,
+        file: None,
     };
+    save_new_item(store, vault, &new_record_id(), data)
+}
+
+pub(super) fn save_new_item<S: Store>(
+    store: &S,
+    vault: &UnlockedVault,
+    id: &str,
+    data: ItemData,
+) -> VaultResult<ItemSummary> {
     let plaintext =
         Zeroizing::new(serde_json::to_vec(&data).map_err(|_| CryptoError::EncryptionFailed)?);
     let sealed = seal_record(
         vault.vault_key(),
         EnvelopeKind::Item,
-        &id,
+        id,
         FIRST_VERSION,
         &plaintext,
     )?;
 
     store.put_envelope(&Envelope {
-        id: id.clone(),
+        id: id.to_string(),
         kind: EnvelopeKind::Item,
         version: FIRST_VERSION,
         is_deleted: false,
-        modified_at: now_ms,
+        modified_at: data.created_at,
         wrapped_key: sealed.wrapped_key,
         payload: sealed.payload,
     })?;
 
     Ok(ItemSummary {
-        id,
-        name,
-        kind: new_item.kind,
-        folder_id: new_item.folder_id,
-        modified_at: now_ms,
+        id: id.to_string(),
+        name: data.name,
+        kind: data.kind,
+        folder_id: data.folder_id,
+        modified_at: data.created_at,
     })
 }
 

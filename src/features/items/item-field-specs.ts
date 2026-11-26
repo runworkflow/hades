@@ -33,7 +33,12 @@ export const creatableItemKinds = Object.keys(
   itemFieldSpecs
 ) as CreatableItemKind[]
 
+const fileFieldSpecs: FieldSpec[] = [
+  { key: "fileName", label: "File name", isSecret: false, isMultiline: false },
+  { key: "size", label: "Size", isSecret: false, isMultiline: false },
+]
+
 export function getFieldSpec(kind: ItemKind, key: string) {
-  const specs = kind === "file" ? [] : itemFieldSpecs[kind]
+  const specs = kind === "file" ? fileFieldSpecs : itemFieldSpecs[kind]
   return specs.find((spec) => spec.key === key)
 }

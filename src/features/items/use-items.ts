@@ -118,3 +118,19 @@ export function useMoveItems() {
       ]),
   })
 }
+
+export function useImportFile() {
+  const queryClient = useQueryClient()
+
+  return useMutation<VaultItem | null, CommandError, string>({
+    mutationFn: itemApi.importFile,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: itemsQueryKey }),
+  })
+}
+
+export function useExportFile(itemId: string) {
+  return useMutation<boolean, CommandError, void>({
+    mutationFn: () => itemApi.exportFile(itemId),
+    gcTime: 0,
+  })
+}

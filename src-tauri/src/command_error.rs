@@ -1,4 +1,4 @@
-use hades_core::{StoreError, VaultError};
+use hades_core::{BlobError, StoreError, VaultError};
 use serde::Serialize;
 
 const INTERNAL_MESSAGE: &str = "Something went wrong. Please try again.";
@@ -10,13 +10,18 @@ pub struct CommandError {
 }
 
 impl CommandError {
-    fn new(code: &'static str, message: String) -> Self {
+    pub fn new(code: &'static str, message: String) -> Self {
         Self { code, message }
     }
 
     pub fn internal() -> Self {
         Self::new("internal", INTERNAL_MESSAGE.to_string())
     }
+}
+
+fn file_too_large_message(maximum_bytes: u64) -> String {
+    let megabytes = maximum_bytes / (1024 * 1024);
+    format!("This file is larger than {megabytes} MiB and cannot be added.")
 }
 
 fn folder_not_empty_message(item_count: usize) -> String {
@@ -44,7 +49,11 @@ impl From<VaultError> for CommandError {
             VaultError::ItemNotFound => Self::new("item_not_found", message),
             VaultError::InvalidField => Self::new("invalid_field", message),
             VaultError::InvalidItemKind => Self::new("invalid_item_kind", message),
-            VaultError::Crypto(_) | VaultError::Store(_) => Self::internal(),
+            VaultError::Blob(BlobError::TooLarge { maximum_bytes }) => {
+                Self::new("file_too_large", file_too_large_message(maximum_bytes))
+            }
+            VaultError::Blob(BlobError::Corrupt) => Self::new("file_damaged", message),
+            VaultError::Blob(_) | VaultError::Crypto(_) | VaultError::Store(_) => Self::internal(),
         }
     }
 }

@@ -1,7 +1,9 @@
 mod app_vault;
+mod atomic_file;
 mod auto_lock_runner;
 mod clock;
 mod command_error;
+mod file_commands;
 mod folder_commands;
 mod item_commands;
 mod secret_clipboard;
@@ -14,6 +16,7 @@ use app_vault::AppVault;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             let data_directory = app.path().app_data_dir()?;
             app.manage(AppVault::open(&data_directory)?);
@@ -40,6 +43,8 @@ pub fn run() {
             item_commands::delete_item,
             item_commands::delete_items,
             item_commands::move_items,
+            file_commands::import_file,
+            file_commands::export_file,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

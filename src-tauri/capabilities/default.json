@@ -24,6 +24,8 @@
     "allow-update-item",
     "allow-delete-item",
     "allow-delete-items",
-    "allow-move-items"
+    "allow-move-items",
+    "allow-import-file",
+    "allow-export-file"
   ]
 }

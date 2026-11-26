@@ -8,12 +8,12 @@ import { TextField } from "@/components/text-field"
 import type { Folder } from "@/features/folders/folder-types"
 
 import { ItemFieldsInputs } from "./item-fields-inputs"
-import type { CreatableItemKind, ItemDetail } from "./item-types"
+import type { ItemDetail, ItemKind } from "./item-types"
 import { useUpdateItem } from "./use-items"
 
 type EditItemFormProps = {
   detail: ItemDetail
-  kind: CreatableItemKind
+  kind: ItemKind
   folders: Folder[]
   onClose: () => void
 }
@@ -22,11 +22,13 @@ function EditItemForm({ detail, kind, folders, onClose }: EditItemFormProps) {
   const [name, setName] = useState(detail.name)
   const [folderId, setFolderId] = useState(detail.folderId)
   const [fields, setFields] = useState<Record<string, string>>(() =>
-    Object.fromEntries(
-      detail.fields
-        .filter((field) => !field.isSecret)
-        .map((field) => [field.key, field.value ?? ""])
-    )
+    kind === "file"
+      ? {}
+      : Object.fromEntries(
+          detail.fields
+            .filter((field) => !field.isSecret)
+            .map((field) => [field.key, field.value ?? ""])
+        )
   )
   const updateItem = useUpdateItem(detail.id)
 
@@ -73,12 +75,14 @@ function EditItemForm({ detail, kind, folders, onClose }: EditItemFormProps) {
           label: folder.name,
         }))}
       />
-      <ItemFieldsInputs
-        kind={kind}
-        values={fields}
-        onChange={setField}
-        keptSecretKeys={keptSecretKeys}
-      />
+      {kind !== "file" && (
+        <ItemFieldsInputs
+          kind={kind}
+          values={fields}
+          onChange={setField}
+          keptSecretKeys={keptSecretKeys}
+        />
+      )}
       <FormError message={updateItem.error?.message} />
       <div className="mt-2 flex gap-3">
         <button
@@ -104,7 +108,7 @@ function EditItemForm({ detail, kind, folders, onClose }: EditItemFormProps) {
 type EditItemDialogProps = {
   isOpen: boolean
   detail: ItemDetail
-  kind: CreatableItemKind
+  kind: ItemKind
   folders: Folder[]
   onClose: () => void
 }

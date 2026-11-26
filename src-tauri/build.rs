@@ -18,6 +18,8 @@ const APP_COMMANDS: &[&str] = &[
     "delete_item",
     "delete_items",
     "move_items",
+    "import_file",
+    "export_file",
 ];
 
 fn main() {

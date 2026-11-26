@@ -47,6 +47,17 @@ const NOTE_FIELDS: &[FieldSpec] = &[FieldSpec {
     is_secret: true,
 }];
 
+const FILE_FIELDS: &[FieldSpec] = &[
+    FieldSpec {
+        key: "fileName",
+        is_secret: false,
+    },
+    FieldSpec {
+        key: "size",
+        is_secret: false,
+    },
+];
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum ItemKind {
@@ -54,6 +65,7 @@ pub enum ItemKind {
     ApiKey,
     SshKey,
     Note,
+    File,
 }
 
 impl ItemKind {
@@ -63,13 +75,20 @@ impl ItemKind {
             Self::ApiKey => "apiKey",
             Self::SshKey => "sshKey",
             Self::Note => "note",
+            Self::File => "file",
         }
     }
 
     pub fn parse(text: &str) -> Option<Self> {
-        [Self::Password, Self::ApiKey, Self::SshKey, Self::Note]
-            .into_iter()
-            .find(|kind| kind.as_str() == text)
+        [
+            Self::Password,
+            Self::ApiKey,
+            Self::SshKey,
+            Self::Note,
+            Self::File,
+        ]
+        .into_iter()
+        .find(|kind| kind.as_str() == text)
     }
 
     pub fn fields(self) -> &'static [FieldSpec] {
@@ -78,6 +97,7 @@ impl ItemKind {
             Self::ApiKey => API_KEY_FIELDS,
             Self::SshKey => SSH_KEY_FIELDS,
             Self::Note => NOTE_FIELDS,
+            Self::File => FILE_FIELDS,
         }
     }
 

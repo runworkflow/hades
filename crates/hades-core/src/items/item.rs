@@ -48,12 +48,22 @@ pub struct ItemUpdate {
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub(super) struct FileData {
+    pub blob_id: String,
+    pub blob_key: Zeroizing<String>,
+    pub size: u64,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub(super) struct ItemData {
     pub name: String,
     pub kind: ItemKind,
     pub folder_id: String,
     pub fields: BTreeMap<String, Zeroizing<String>>,
     pub created_at: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file: Option<FileData>,
 }
 
 #[derive(Deserialize)]

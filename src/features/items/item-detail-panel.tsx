@@ -12,6 +12,7 @@ import { formatRelativeTime } from "@/lib/format-relative-time"
 
 import { DeleteItemDialog } from "./delete-item-dialog"
 import { EditItemDialog } from "./edit-item-dialog"
+import { ExportFileButton } from "./export-file-button"
 import { ItemFieldRow } from "./item-field-row"
 import { itemKinds } from "./item-kinds"
 import type { ItemDetail } from "./item-types"
@@ -47,11 +48,9 @@ function ItemDetailContent({
           <h2 className="truncate text-lg font-semibold">{detail.name}</h2>
           <span className="text-sm text-ink-muted">{kind.label}</span>
         </div>
-        {detail.kind !== "file" && (
-          <IconButton label="Edit item" onClick={() => setIsEditing(true)}>
-            <PenIcon size={18} />
-          </IconButton>
-        )}
+        <IconButton label="Edit item" onClick={() => setIsEditing(true)}>
+          <PenIcon size={18} />
+        </IconButton>
         <IconButton label="Delete item" onClick={() => setIsDeleting(true)}>
           <TrashBinTrashIcon size={18} />
         </IconButton>
@@ -69,6 +68,7 @@ function ItemDetailContent({
           />
         ))}
       </div>
+      {detail.kind === "file" && <ExportFileButton itemId={detail.id} />}
       <dl className="flex gap-8 px-1 text-sm">
         <div>
           <dt className="text-xs tracking-wide text-ink-muted uppercase">
@@ -83,15 +83,13 @@ function ItemDetailContent({
           <dd>{formatRelativeTime(detail.modifiedAt)}</dd>
         </div>
       </dl>
-      {detail.kind !== "file" && (
-        <EditItemDialog
-          isOpen={isEditing}
-          detail={detail}
-          kind={detail.kind}
-          folders={folders}
-          onClose={() => setIsEditing(false)}
-        />
-      )}
+      <EditItemDialog
+        isOpen={isEditing}
+        detail={detail}
+        kind={detail.kind}
+        folders={folders}
+        onClose={() => setIsEditing(false)}
+      />
       <DeleteItemDialog
         isOpen={isDeleting}
         itemId={detail.id}
