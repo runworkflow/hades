@@ -10,6 +10,7 @@ mod item_commands;
 mod macos_biometrics;
 mod macos_system_events;
 mod process_protection;
+mod recovery_key_commands;
 mod secret_clipboard;
 mod security_commands;
 mod sync_commands;
@@ -59,6 +60,7 @@ pub fn run() {
             file_commands::export_file,
             security_commands::change_password,
             security_commands::create_new_recovery_key,
+            recovery_key_commands::save_recovery_key,
             biometric_commands::get_biometric_status,
             biometric_commands::enable_biometric_unlock,
             biometric_commands::disable_biometric_unlock,

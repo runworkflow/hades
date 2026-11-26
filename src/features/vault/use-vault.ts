@@ -41,6 +41,13 @@ export function useUnlockWithRecoveryKey() {
   return useVaultMutation(vaultApi.unlockWithRecoveryKey)
 }
 
+export function useSaveRecoveryKey() {
+  return useMutation<boolean, CommandError, string>({
+    mutationFn: vaultApi.saveRecoveryKey,
+    gcTime: 0,
+  })
+}
+
 export function useLockVault() {
   const queryClient = useQueryClient()
 
