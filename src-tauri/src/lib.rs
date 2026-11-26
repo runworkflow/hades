@@ -9,6 +9,7 @@ mod folder_commands;
 mod item_commands;
 mod macos_biometrics;
 mod macos_system_events;
+mod process_protection;
 mod secret_clipboard;
 mod security_commands;
 mod vault_commands;
@@ -19,6 +20,7 @@ use app_vault::AppVault;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    process_protection::start();
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {

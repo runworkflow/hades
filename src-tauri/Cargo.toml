@@ -20,5 +20,6 @@ tauri = { version = "2", features = [] }
 hades-core = { path = "../crates/hades-core" }
 serde = { version = "1", features = ["derive"] }
 zeroize = "1"
+libc = "0.2"
 arboard = { version = "3.7.0", default-features = false }
 tauri-plugin-dialog = "2.8.4"

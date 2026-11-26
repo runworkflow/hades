@@ -1,6 +1,7 @@
 import { useState } from "react"
 import {
   FingerprintIcon,
+  EyeClosedIcon,
   KeyIcon,
   ShieldKeyholeIcon,
 } from "@solar-icons/react/linear"
@@ -11,8 +12,10 @@ import { TouchIdForm } from "@/features/biometrics/touch-id-form"
 
 import { ChangePasswordForm } from "./change-password-form"
 import { NewRecoveryKeyForm } from "./new-recovery-key-form"
+import { ScreenCaptureForm } from "./screen-capture-form"
 
-type SecurityView = "menu" | "password" | "recovery" | "touchId"
+type SecurityView =
+  "menu" | "password" | "recovery" | "touchId" | "screenCapture"
 
 const optionClasses =
   "flex items-center gap-4 rounded-2xl bg-raised p-4 text-left transition-colors hover:bg-raised-hover"
@@ -28,6 +31,9 @@ function SecurityContent({ onClose }: { onClose: () => void }) {
   }
   if (view === "touchId") {
     return <TouchIdForm onDone={() => setView("menu")} />
+  }
+  if (view === "screenCapture") {
+    return <ScreenCaptureForm onDone={() => setView("menu")} />
   }
 
   return (
@@ -68,6 +74,19 @@ function SecurityContent({ onClose }: { onClose: () => void }) {
           <span className="font-medium">Touch ID unlock</span>
           <span className="text-sm text-ink-muted">
             Open the vault with your fingerprint.
+          </span>
+        </span>
+      </button>
+      <button
+        type="button"
+        onClick={() => setView("screenCapture")}
+        className={optionClasses}
+      >
+        <EyeClosedIcon size={22} />
+        <span className="flex flex-col">
+          <span className="font-medium">Screen capture protection</span>
+          <span className="text-sm text-ink-muted">
+            Hide Hades from screenshots and screen sharing.
           </span>
         </span>
       </button>
