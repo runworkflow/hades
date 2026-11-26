@@ -8,8 +8,8 @@ use super::password::{check_password_strength, normalize_password};
 use super::recovery_key::RecoveryKey;
 use super::unlocked_vault::UnlockedVault;
 
-const PASSWORD_WRAP_CONTEXT: &[u8] = b"hades:vault-key:password";
-const RECOVERY_WRAP_CONTEXT: &[u8] = b"hades:vault-key:recovery";
+pub(super) const PASSWORD_WRAP_CONTEXT: &[u8] = b"hades:vault-key:password";
+pub(super) const RECOVERY_WRAP_CONTEXT: &[u8] = b"hades:vault-key:recovery";
 
 pub struct NewVault {
     pub vault: UnlockedVault,
@@ -48,24 +48,31 @@ pub fn create_vault<S: Store>(store: &S, password: &str, created_at: i64) -> Vau
     })
 }
 
-pub fn unlock_with_password<S: Store>(store: &S, password: &str) -> VaultResult<UnlockedVault> {
-    let settings = store
-        .get_vault_settings()?
-        .ok_or(VaultError::NotInitialized)?;
+pub(super) fn unwrap_with_password(
+    settings: &VaultSettings,
+    password: &str,
+) -> VaultResult<SecretKey> {
     let normalized_password = normalize_password(password);
-
     let password_key = derive_key(
         normalized_password.as_bytes(),
         &settings.kdf_salt,
         &settings.kdf_params,
     )?;
-    let vault_key = unwrap_key(
+    unwrap_key(
         &password_key,
         &settings.password_wrapped_key,
         PASSWORD_WRAP_CONTEXT,
     )
-    .map_err(|_| VaultError::IncorrectPassword)?;
-    Ok(UnlockedVault::new(vault_key))
+    .map_err(|_| VaultError::IncorrectPassword)
+}
+
+pub fn unlock_with_password<S: Store>(store: &S, password: &str) -> VaultResult<UnlockedVault> {
+    let settings = store
+        .get_vault_settings()?
+        .ok_or(VaultError::NotInitialized)?;
+    Ok(UnlockedVault::new(unwrap_with_password(
+        &settings, password,
+    )?))
 }
 
 pub fn unlock_with_recovery_key<S: Store>(

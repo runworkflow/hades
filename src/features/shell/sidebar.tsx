@@ -1,4 +1,8 @@
-import { ClockCircleIcon, LockKeyholeIcon } from "@solar-icons/react/linear"
+import {
+  ClockCircleIcon,
+  LockKeyholeIcon,
+  ShieldCheckIcon,
+} from "@solar-icons/react/linear"
 
 import { FolderSection } from "@/features/folders/folder-section"
 import type { Folder } from "@/features/folders/folder-types"
@@ -12,6 +16,7 @@ type SidebarProps = {
   activeViewId: string
   onSelectView: (viewId: string) => void
   onLock: () => void
+  onOpenSecurity: () => void
 }
 
 export function Sidebar({
@@ -20,6 +25,7 @@ export function Sidebar({
   activeViewId,
   onSelectView,
   onLock,
+  onOpenSecurity,
 }: SidebarProps) {
   const visibilityClasses = isOpen ? "opacity-100 delay-75" : "opacity-0"
 
@@ -41,6 +47,12 @@ export function Sidebar({
           onSelectFolder={onSelectView}
         />
         <div className="mt-2 flex flex-col gap-2 border-t border-line pt-3">
+          <SidebarNavItem
+            icon={ShieldCheckIcon}
+            label="Security"
+            isActive={false}
+            onSelect={onOpenSecurity}
+          />
           <SidebarNavItem
             icon={LockKeyholeIcon}
             label="Lock vault"

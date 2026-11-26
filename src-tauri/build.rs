@@ -20,6 +20,8 @@ const APP_COMMANDS: &[&str] = &[
     "move_items",
     "import_file",
     "export_file",
+    "change_password",
+    "create_new_recovery_key",
 ];
 
 fn main() {

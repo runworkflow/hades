@@ -1,6 +1,7 @@
 use crate::store::{Store, StoreResult};
 
-use super::error::VaultResult;
+use super::credentials::{change_password, regenerate_recovery_key};
+use super::error::{VaultError, VaultResult};
 use super::lifecycle::{create_vault, unlock_with_password, unlock_with_recovery_key};
 use super::recovery_key::RecoveryKey;
 use super::unlocked_vault::UnlockedVault;
@@ -55,6 +56,22 @@ impl<S: Store> VaultSession<S> {
 
     pub fn lock(&mut self) {
         self.unlocked_vault = None;
+    }
+
+    pub fn change_password(&self, current_password: &str, new_password: &str) -> VaultResult<()> {
+        let vault = self
+            .unlocked_vault
+            .as_ref()
+            .ok_or(VaultError::VaultLocked)?;
+        change_password(&self.store, vault, current_password, new_password)
+    }
+
+    pub fn regenerate_recovery_key(&self, current_password: &str) -> VaultResult<RecoveryKey> {
+        let vault = self
+            .unlocked_vault
+            .as_ref()
+            .ok_or(VaultError::VaultLocked)?;
+        regenerate_recovery_key(&self.store, vault, current_password)
     }
 
     pub fn unlocked_vault(&self) -> Option<&UnlockedVault> {

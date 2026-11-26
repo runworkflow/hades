@@ -7,6 +7,7 @@ import { useItems } from "@/features/items/use-items"
 import { useNavigationHistory } from "@/features/navigation/use-navigation-history"
 import { recentViewId } from "@/features/navigation/view-ids"
 import { useFolders } from "@/features/folders/use-folders"
+import { SecurityDialog } from "@/features/security/security-dialog"
 import { useActivityReporter } from "@/features/vault/use-activity-reporter"
 import { useLockVault } from "@/features/vault/use-vault"
 
@@ -15,6 +16,7 @@ import { Sidebar } from "./sidebar"
 
 export function AppShell() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const [isSecurityOpen, setIsSecurityOpen] = useState(false)
   const navigation = useNavigationHistory(recentViewId)
   const lockVault = useLockVault()
   useActivityReporter()
@@ -57,6 +59,7 @@ export function AppShell() {
         activeViewId={viewId}
         onSelectView={navigation.goTo}
         onLock={() => lockVault.mutate()}
+        onOpenSecurity={() => setIsSecurityOpen(true)}
       />
       <main
         className={`mt-2 mr-2 mb-2 flex min-w-0 overflow-hidden rounded-pane bg-pane transition-[margin] duration-300 ease-out ${paneMarginClass}`}
@@ -79,6 +82,10 @@ export function AppShell() {
           onFolderDeleted={() => navigation.goTo(recentViewId)}
         />
       </main>
+      <SecurityDialog
+        isOpen={isSecurityOpen}
+        onClose={() => setIsSecurityOpen(false)}
+      />
     </div>
   )
 }

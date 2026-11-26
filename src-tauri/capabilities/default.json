@@ -26,6 +26,8 @@
     "allow-delete-items",
     "allow-move-items",
     "allow-import-file",
-    "allow-export-file"
+    "allow-export-file",
+    "allow-change-password",
+    "allow-create-new-recovery-key"
   ]
 }

@@ -1,4 +1,5 @@
 mod auto_lock;
+mod credentials;
 mod error;
 mod lifecycle;
 mod password;

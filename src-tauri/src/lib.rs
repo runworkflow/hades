@@ -7,6 +7,7 @@ mod file_commands;
 mod folder_commands;
 mod item_commands;
 mod secret_clipboard;
+mod security_commands;
 mod vault_commands;
 
 use tauri::Manager;
@@ -45,6 +46,8 @@ pub fn run() {
             item_commands::move_items,
             file_commands::import_file,
             file_commands::export_file,
+            security_commands::change_password,
+            security_commands::create_new_recovery_key,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
