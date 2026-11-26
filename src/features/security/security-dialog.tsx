@@ -1,10 +1,5 @@
 import { useState } from "react"
-import {
-  FingerprintIcon,
-  EyeClosedIcon,
-  KeyIcon,
-  ShieldKeyholeIcon,
-} from "@solar-icons/react/linear"
+import { KeyIcon, ShieldKeyholeIcon } from "@solar-icons/react/linear"
 
 import { Modal } from "@/components/modal"
 
@@ -12,13 +7,11 @@ import { TouchIdForm } from "@/features/biometrics/touch-id-form"
 
 import { ChangePasswordForm } from "./change-password-form"
 import { NewRecoveryKeyForm } from "./new-recovery-key-form"
-import { ScreenCaptureForm } from "./screen-capture-form"
+import { ScreenCaptureOption } from "./screen-capture-option"
+import { SecurityOption } from "./security-option"
+import { TouchIdOption } from "./touch-id-option"
 
-type SecurityView =
-  "menu" | "password" | "recovery" | "touchId" | "screenCapture"
-
-const optionClasses =
-  "flex items-center gap-4 rounded-2xl bg-raised p-4 text-left transition-colors hover:bg-raised-hover"
+type SecurityView = "menu" | "password" | "recovery" | "touchId"
 
 function SecurityContent({ onClose }: { onClose: () => void }) {
   const [view, setView] = useState<SecurityView>("menu")
@@ -32,64 +25,25 @@ function SecurityContent({ onClose }: { onClose: () => void }) {
   if (view === "touchId") {
     return <TouchIdForm onDone={() => setView("menu")} />
   }
-  if (view === "screenCapture") {
-    return <ScreenCaptureForm onDone={() => setView("menu")} />
-  }
 
   return (
     <div className="flex flex-col gap-3">
-      <button
-        type="button"
+      <SecurityOption
+        icon={<KeyIcon size={22} />}
+        title="Change master password"
+        description="Your data stays as it is."
+        hasChevron
         onClick={() => setView("password")}
-        className={optionClasses}
-      >
-        <KeyIcon size={22} />
-        <span className="flex flex-col">
-          <span className="font-medium">Change master password</span>
-          <span className="text-sm text-ink-muted">
-            Your data stays as it is.
-          </span>
-        </span>
-      </button>
-      <button
-        type="button"
+      />
+      <SecurityOption
+        icon={<ShieldKeyholeIcon size={22} />}
+        title="Make a new recovery key"
+        description="The old recovery key stops working."
+        hasChevron
         onClick={() => setView("recovery")}
-        className={optionClasses}
-      >
-        <ShieldKeyholeIcon size={22} />
-        <span className="flex flex-col">
-          <span className="font-medium">Make a new recovery key</span>
-          <span className="text-sm text-ink-muted">
-            The old recovery key stops working.
-          </span>
-        </span>
-      </button>
-      <button
-        type="button"
-        onClick={() => setView("touchId")}
-        className={optionClasses}
-      >
-        <FingerprintIcon size={22} />
-        <span className="flex flex-col">
-          <span className="font-medium">Touch ID unlock</span>
-          <span className="text-sm text-ink-muted">
-            Open the vault with your fingerprint.
-          </span>
-        </span>
-      </button>
-      <button
-        type="button"
-        onClick={() => setView("screenCapture")}
-        className={optionClasses}
-      >
-        <EyeClosedIcon size={22} />
-        <span className="flex flex-col">
-          <span className="font-medium">Screen capture protection</span>
-          <span className="text-sm text-ink-muted">
-            Hide Hades from screenshots and screen sharing.
-          </span>
-        </span>
-      </button>
+      />
+      <TouchIdOption onOpen={() => setView("touchId")} />
+      <ScreenCaptureOption />
       <button
         type="button"
         onClick={onClose}
