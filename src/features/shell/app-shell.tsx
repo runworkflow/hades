@@ -1,7 +1,5 @@
 import { useState } from "react"
-import { SidebarMinimalisticIcon } from "@solar-icons/react/linear"
 
-import { IconButton } from "@/components/icon-button"
 import { ItemsWorkspace } from "@/features/items/items-workspace"
 import { useItems } from "@/features/items/use-items"
 import { useNavigationHistory } from "@/features/navigation/use-navigation-history"
@@ -50,13 +48,6 @@ export function AppShell() {
         data-tauri-drag-region
         className="absolute inset-x-0 top-0 z-10 h-12"
       />
-      <IconButton
-        label="Toggle sidebar"
-        onClick={() => setIsSidebarOpen((isOpen) => !isOpen)}
-        className="absolute top-4 left-23 z-20"
-      >
-        <SidebarMinimalisticIcon size={20} />
-      </IconButton>
       <Sidebar
         isOpen={isSidebarOpen}
         folders={folders}
@@ -76,6 +67,7 @@ export function AppShell() {
               isSidebarOpen={isSidebarOpen}
               canGoBack={navigation.canGoBack}
               canGoForward={navigation.canGoForward}
+              onToggleSidebar={() => setIsSidebarOpen((isOpen) => !isOpen)}
               onGoBack={navigation.goBack}
               onGoForward={navigation.goForward}
             >
