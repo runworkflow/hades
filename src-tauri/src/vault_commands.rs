@@ -41,9 +41,11 @@ pub fn throttled<T>(
     vault: &AppVault,
     attempt: impl FnOnce() -> Result<T, VaultError>,
 ) -> Result<T, CommandError> {
-    if let Ok(throttle) = vault.unlock_throttle.lock()
-        && let Err(remaining_ms) = throttle.check(current_unix_millis())
-    {
+    let mut throttle = vault
+        .unlock_throttle
+        .lock()
+        .unwrap_or_else(PoisonError::into_inner);
+    if let Err(remaining_ms) = throttle.check(current_unix_millis()) {
         return Err(VaultError::TooManyAttempts {
             retry_after_seconds: remaining_ms.unsigned_abs().div_ceil(1000),
         }
@@ -51,22 +53,22 @@ pub fn throttled<T>(
     }
 
     let result = attempt();
-    if let Ok(mut throttle) = vault.unlock_throttle.lock() {
-        match &result {
-            Ok(_) => throttle.record_success(),
-            Err(VaultError::IncorrectPassword | VaultError::IncorrectRecoveryKey) => {
-                throttle.record_failure(current_unix_millis());
-            }
-            Err(_) => {}
+    match &result {
+        Ok(_) => throttle.record_success(),
+        Err(VaultError::IncorrectPassword | VaultError::IncorrectRecoveryKey) => {
+            throttle.record_failure(current_unix_millis());
         }
+        Err(_) => {}
     }
     result.map_err(CommandError::from)
 }
 
 pub fn record_unlock_success(vault: &AppVault) {
-    if let Ok(mut throttle) = vault.unlock_throttle.lock() {
-        throttle.record_success();
-    }
+    vault
+        .unlock_throttle
+        .lock()
+        .unwrap_or_else(PoisonError::into_inner)
+        .record_success();
 }
 
 pub fn lock_session(
