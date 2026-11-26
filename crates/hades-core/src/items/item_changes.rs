@@ -1,15 +1,13 @@
 use zeroize::Zeroizing;
 
 use crate::error::CryptoError;
-use crate::records::{clean_name, seal_record};
+use crate::records::{DELETED_PAYLOAD, clean_name, seal_record};
 use crate::store::{Envelope, EnvelopeKind, Store};
 use crate::vault::{UnlockedVault, VaultError, VaultResult};
 
 use super::item::{ItemSummary, ItemUpdate, MAX_ITEM_NAME_LENGTH};
 use super::item_kind::ItemKind;
 use super::item_service::{check_fields, check_folder_exists, find_item_envelope, read_data};
-
-const DELETED_PAYLOAD: &[u8] = b"{}";
 
 pub(super) fn seal_item_envelope(
     vault: &UnlockedVault,

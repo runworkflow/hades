@@ -69,6 +69,7 @@ pub fn decide_merge(
         (true, true) => resolve_conflict(local, remote),
         (true, false) => MergeDecision::PushLocal,
         (false, true) => MergeDecision::TakeRemote,
+        (false, false) if remote.version < local.version => MergeDecision::PushLocal,
         (false, false) => MergeDecision::AlreadyInSync,
     }
 }

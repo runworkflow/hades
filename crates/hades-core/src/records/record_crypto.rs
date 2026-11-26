@@ -6,6 +6,12 @@ use crate::sealed::{Sealed, open, seal};
 use crate::secret_key::SecretKey;
 use crate::store::{Envelope, EnvelopeKind};
 
+pub const DELETED_PAYLOAD: &[u8] = b"{}";
+
+pub fn is_deleted_payload(plaintext: &[u8]) -> bool {
+    plaintext == DELETED_PAYLOAD
+}
+
 pub struct SealedRecord {
     pub wrapped_key: WrappedKey,
     pub payload: Sealed,

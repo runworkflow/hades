@@ -2,14 +2,12 @@ use zeroize::Zeroizing;
 
 use crate::error::CryptoError;
 use crate::items::count_items_in_folder;
-use crate::records::seal_record;
+use crate::records::{DELETED_PAYLOAD, seal_record};
 use crate::store::{Envelope, EnvelopeKind, Store};
 use crate::vault::{UnlockedVault, VaultError, VaultResult};
 
 use super::folder::{Folder, FolderData, validate_folder_name, validate_icon_name};
 use super::folder_service::read_folder;
-
-const DELETED_PAYLOAD: &[u8] = b"{}";
 
 pub fn update_folder<S: Store>(
     store: &S,

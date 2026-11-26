@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use crate::folders::make_folder_conflict_copy;
 use crate::items::make_item_conflict_copy;
-use crate::records::open_record;
+use crate::records::{is_deleted_payload, open_record};
 use crate::store::{Envelope, EnvelopeKind, Store, SyncBaseline};
 use crate::vault::UnlockedVault;
 
@@ -20,7 +20,9 @@ struct RecordSync<'a, S: Store> {
 
 fn is_trustworthy(vault: &UnlockedVault, local: Option<&Envelope>, remote: &Envelope) -> bool {
     let kind_matches = local.is_none_or(|existing| existing.kind == remote.kind);
-    kind_matches && open_record(vault.vault_key(), remote).is_ok()
+    kind_matches
+        && open_record(vault.vault_key(), remote)
+            .is_ok_and(|plaintext| remote.is_deleted == is_deleted_payload(&plaintext))
 }
 
 impl<S: Store> RecordSync<'_, S> {
@@ -71,8 +73,8 @@ impl<S: Store> RecordSync<'_, S> {
             (Some(vault), Some(candidate))
                 if !is_trustworthy(vault, local.as_ref(), &candidate) =>
             {
-                report.rejected_record_ids.push(id);
-                return Ok(());
+                report.rejected_record_ids.push(id.clone());
+                None
             }
             (_, candidate) => candidate,
         };
