@@ -25,6 +25,11 @@ export function describeSyncResult(summary: SyncSummary): string[] {
       "Two Macs changed the password at the same time. If your password does not work, try the other one."
     )
   }
+  if (summary.settingsRejected) {
+    lines.push(
+      "A settings file in the folder was not made with your vault key. Hades ignored it and put your own settings back."
+    )
+  }
   if (summary.skippedFileCount > 0) {
     lines.push(
       `${countOf(summary.skippedFileCount, "file", "files")} in the folder could not be read and ${summary.skippedFileCount === 1 ? "was" : "were"} skipped.`

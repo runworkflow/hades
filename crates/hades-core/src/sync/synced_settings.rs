@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::key_derivation::{KdfParams, SALT_LENGTH, Salt};
 use crate::key_wrapping::WrappedKey;
 use crate::records::is_valid_record_id;
+use crate::sealed::Sealed;
 use crate::store::{BiometricSettings, VaultSettings};
 
 use super::record_file::{FILE_FORMAT_VERSION, SealedFile};
@@ -21,6 +22,7 @@ pub struct SyncedSettings {
     pub kdf_params: KdfParams,
     pub password_wrapped_key: WrappedKey,
     pub recovery_wrapped_key: WrappedKey,
+    pub authentication: Option<Sealed>,
 }
 
 impl SyncedSettings {
@@ -33,6 +35,7 @@ impl SyncedSettings {
             kdf_params: settings.kdf_params,
             password_wrapped_key: settings.password_wrapped_key.clone(),
             recovery_wrapped_key: settings.recovery_wrapped_key.clone(),
+            authentication: settings.authentication.clone(),
         }
     }
 
@@ -45,7 +48,7 @@ impl SyncedSettings {
             kdf_params: self.kdf_params,
             password_wrapped_key: self.password_wrapped_key,
             recovery_wrapped_key: self.recovery_wrapped_key,
-            authentication: None,
+            authentication: self.authentication,
             biometric,
         }
     }
@@ -64,6 +67,8 @@ struct SettingsFile {
     kdf_lanes: u32,
     password_wrapped_key: SealedFile,
     recovery_wrapped_key: SealedFile,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    authentication: Option<SealedFile>,
 }
 
 fn are_kdf_params_reasonable(params: &KdfParams) -> bool {
@@ -84,6 +89,10 @@ pub fn encode_settings(settings: &SyncedSettings) -> SyncResult<Vec<u8>> {
         kdf_lanes: settings.kdf_params.lanes,
         password_wrapped_key: SealedFile::from_sealed(&settings.password_wrapped_key.0),
         recovery_wrapped_key: SealedFile::from_sealed(&settings.recovery_wrapped_key.0),
+        authentication: settings
+            .authentication
+            .as_ref()
+            .map(SealedFile::from_sealed),
     };
     serde_json::to_vec(&file).map_err(|_| SyncError::DamagedFile)
 }
@@ -114,5 +123,9 @@ pub fn decode_settings(bytes: &[u8]) -> SyncResult<SyncedSettings> {
         kdf_params,
         password_wrapped_key: WrappedKey(file.password_wrapped_key.into_sealed()?),
         recovery_wrapped_key: WrappedKey(file.recovery_wrapped_key.into_sealed()?),
+        authentication: file
+            .authentication
+            .map(SealedFile::into_sealed)
+            .transpose()?,
     })
 }

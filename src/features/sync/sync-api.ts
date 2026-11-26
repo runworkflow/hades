@@ -6,6 +6,7 @@ export type SyncSummary = {
   conflictCopies: number
   settingsPulled: boolean
   settingsConflict: boolean
+  settingsRejected: boolean
   skippedFileCount: number
   rejectedRecordCount: number
   missingBlobCount: number

@@ -1,6 +1,8 @@
 use std::cmp::Ordering;
 
+use crate::settings_authentication::is_settings_authentic;
 use crate::store::Store;
+use crate::vault::UnlockedVault;
 
 use super::shared_folder::SharedFolder;
 use super::sync_error::{SyncError, SyncResult};
@@ -31,10 +33,30 @@ fn choose_direction(local: &SyncedSettings, remote: &SyncedSettings) -> (Setting
     }
 }
 
+fn is_remote_authentic(vault: &UnlockedVault, remote: &SyncedSettings) -> bool {
+    let Some(authentication) = &remote.authentication else {
+        return false;
+    };
+    let candidate = remote.clone().into_vault_settings(None);
+    is_settings_authentic(vault.vault_key(), &candidate, authentication)
+}
+
+fn push_if_signed(
+    folder: &SharedFolder,
+    local: &SyncedSettings,
+    report: &mut SyncReport,
+) -> SyncResult<()> {
+    if local.authentication.is_some() {
+        folder.write_settings(local)?;
+        report.settings_pushed = true;
+    }
+    Ok(())
+}
+
 pub(super) fn sync_settings<S: Store>(
     store: &S,
     folder: &SharedFolder,
-    should_pull: bool,
+    vault: Option<&UnlockedVault>,
     report: &mut SyncReport,
 ) -> SyncResult<()> {
     let local_settings = store
@@ -42,9 +64,7 @@ pub(super) fn sync_settings<S: Store>(
         .ok_or(SyncError::VaultNotCreated)?;
     let local = SyncedSettings::from_vault_settings(&local_settings);
     let Some(remote) = folder.read_settings()? else {
-        folder.write_settings(&local)?;
-        report.settings_pushed = true;
-        return Ok(());
+        return push_if_signed(folder, &local, report);
     };
     if remote.vault_id != local.vault_id {
         return Err(SyncError::DifferentVault);
@@ -52,14 +72,15 @@ pub(super) fn sync_settings<S: Store>(
     if remote == local {
         return Ok(());
     }
+    if vault.is_some_and(|vault| !is_remote_authentic(vault, &remote)) {
+        report.settings_rejected = true;
+        return push_if_signed(folder, &local, report);
+    }
 
     let (direction, is_conflict) = choose_direction(&local, &remote);
     match direction {
-        SettingsDirection::Push => {
-            folder.write_settings(&local)?;
-            report.settings_pushed = true;
-        }
-        SettingsDirection::Pull if should_pull => {
+        SettingsDirection::Push => push_if_signed(folder, &local, report)?,
+        SettingsDirection::Pull if vault.is_some() => {
             store.put_vault_settings(&remote.into_vault_settings(local_settings.biometric))?;
             report.settings_pulled = true;
         }

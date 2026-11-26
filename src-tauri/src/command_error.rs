@@ -129,6 +129,11 @@ impl From<SyncError> for CommandError {
                 "The sync folder was written by a newer version of Hades. Update Hades."
                     .to_string(),
             ),
+            SyncError::UnsignedSettings => Self::new(
+                "sync_older_version",
+                "The vault in that folder was saved by an older version of Hades. Update Hades on the other Mac first."
+                    .to_string(),
+            ),
             SyncError::DamagedFile | SyncError::InvalidName => Self::new(
                 "sync_damaged",
                 "A file in the sync folder is damaged.".to_string(),

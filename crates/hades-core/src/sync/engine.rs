@@ -17,7 +17,7 @@ pub fn sync_with_folder<S: Store>(
     now_ms: i64,
 ) -> SyncResult<SyncReport> {
     let mut report = SyncReport::default();
-    sync_settings(store, folder, true, &mut report)?;
+    sync_settings(store, folder, Some(vault), &mut report)?;
     sync_records(store, folder, Some(vault), now_ms, &mut report)?;
     push_missing_blobs(blobs, folder, &mut report)?;
     pull_needed_blobs(store, vault, blobs, folder, &mut report)?;
@@ -29,6 +29,9 @@ pub fn join_from_folder<S: Store>(store: &S, folder: &SharedFolder) -> SyncResul
         return Err(SyncError::VaultAlreadyExists);
     }
     let remote = folder.read_settings()?.ok_or(SyncError::FolderHasNoVault)?;
+    if remote.authentication.is_none() {
+        return Err(SyncError::UnsignedSettings);
+    }
     store.put_vault_settings(&remote.into_vault_settings(None))?;
     store.clear_sync_baselines()?;
     Ok(())
@@ -40,7 +43,7 @@ pub fn push_to_folder<S: Store>(
     folder: &SharedFolder,
 ) -> SyncResult<SyncReport> {
     let mut report = SyncReport::default();
-    sync_settings(store, folder, false, &mut report)?;
+    sync_settings(store, folder, None, &mut report)?;
     sync_records(store, folder, None, 0, &mut report)?;
     push_missing_blobs(blobs, folder, &mut report)?;
     Ok(report)

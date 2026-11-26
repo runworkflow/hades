@@ -6,6 +6,7 @@ pub struct SyncReport {
     pub settings_pushed: bool,
     pub settings_pulled: bool,
     pub settings_conflict: bool,
+    pub settings_rejected: bool,
     pub blobs_pushed: usize,
     pub blobs_pulled: usize,
     pub blobs_missing: usize,

@@ -12,6 +12,8 @@ pub enum SyncError {
     DamagedFile,
     #[error("a file in the sync folder was written by a newer version of Hades")]
     UnsupportedFormat,
+    #[error("the vault in this sync folder was saved by an older version of Hades")]
+    UnsignedSettings,
     #[error("a file in the sync folder has a name Hades does not accept")]
     InvalidName,
     #[error("this sync folder belongs to a different vault")]
