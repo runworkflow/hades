@@ -4,6 +4,8 @@ use crate::blobs::BlobError;
 use crate::error::CryptoError;
 use crate::store::StoreError;
 
+use super::biometrics::BiometricError;
+
 #[derive(Debug, Error)]
 pub enum VaultError {
     #[error("the password must be at least {minimum_length} characters")]
@@ -34,6 +36,10 @@ pub enum VaultError {
     InvalidField,
     #[error("the item type is not valid")]
     InvalidItemKind,
+    #[error("Touch ID unlock is not turned on")]
+    BiometricsNotEnabled,
+    #[error(transparent)]
+    Biometric(#[from] BiometricError),
     #[error(transparent)]
     Blob(#[from] BlobError),
     #[error(transparent)]

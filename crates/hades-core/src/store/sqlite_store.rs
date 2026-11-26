@@ -35,8 +35,10 @@ const REPLACE_VAULT_SETTINGS: &str = "
     INSERT OR REPLACE INTO vault_settings (
         id, created_at, kdf_salt, kdf_memory_kib, kdf_iterations, kdf_lanes,
         password_key_nonce, password_key_ciphertext,
-        recovery_key_nonce, recovery_key_ciphertext
-    ) VALUES (1, ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)
+        recovery_key_nonce, recovery_key_ciphertext,
+        biometric_key_blob, biometric_public_key,
+        biometric_key_nonce, biometric_key_ciphertext
+    ) VALUES (1, ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)
 ";
 
 pub struct SqliteStore {
@@ -123,6 +125,7 @@ impl Store for SqliteStore {
     }
 
     fn put_vault_settings(&self, settings: &VaultSettings) -> StoreResult<()> {
+        let biometric = settings.biometric.as_ref();
         self.connection.execute(
             REPLACE_VAULT_SETTINGS,
             params![
@@ -135,6 +138,10 @@ impl Store for SqliteStore {
                 settings.password_wrapped_key.0.ciphertext,
                 settings.recovery_wrapped_key.0.nonce,
                 settings.recovery_wrapped_key.0.ciphertext,
+                biometric.map(|b| b.key_blob.as_slice()),
+                biometric.map(|b| b.ephemeral_public_key.as_slice()),
+                biometric.map(|b| b.wrapped_key.0.nonce),
+                biometric.map(|b| b.wrapped_key.0.ciphertext.as_slice()),
             ],
         )?;
         Ok(())

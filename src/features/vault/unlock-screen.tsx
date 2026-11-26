@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react"
 
 import { FormError } from "@/components/form-error"
+import { TouchIdUnlockButton } from "@/features/biometrics/touch-id-unlock-button"
 import { PrimaryButton } from "@/components/primary-button"
 import { TextField } from "@/components/text-field"
 
@@ -39,6 +40,7 @@ export function UnlockScreen() {
           : "Enter your master password to open your vault."
       }
     >
+      {!isRecoveryKey && <TouchIdUnlockButton />}
       <form onSubmit={handleSubmit} className="flex w-full flex-col gap-4">
         <TextField
           key={method}

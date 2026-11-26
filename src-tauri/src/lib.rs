@@ -1,11 +1,13 @@
 mod app_vault;
 mod atomic_file;
 mod auto_lock_runner;
+mod biometric_commands;
 mod clock;
 mod command_error;
 mod file_commands;
 mod folder_commands;
 mod item_commands;
+mod macos_biometrics;
 mod secret_clipboard;
 mod security_commands;
 mod vault_commands;
@@ -48,6 +50,10 @@ pub fn run() {
             file_commands::export_file,
             security_commands::change_password,
             security_commands::create_new_recovery_key,
+            biometric_commands::get_biometric_status,
+            biometric_commands::enable_biometric_unlock,
+            biometric_commands::disable_biometric_unlock,
+            biometric_commands::unlock_with_biometrics,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

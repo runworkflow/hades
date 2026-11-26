@@ -2,7 +2,7 @@ use rusqlite::Connection;
 
 use super::error::{StoreError, StoreResult};
 
-const CURRENT_SCHEMA_VERSION: i64 = 2;
+const CURRENT_SCHEMA_VERSION: i64 = 3;
 
 const CREATE_SCHEMA_VERSION_1: &str = "
     BEGIN;
@@ -40,6 +40,16 @@ const UPGRADE_TO_SCHEMA_VERSION_2: &str = "
     COMMIT;
 ";
 
+const UPGRADE_TO_SCHEMA_VERSION_3: &str = "
+    BEGIN;
+    ALTER TABLE vault_settings ADD COLUMN biometric_key_blob BLOB;
+    ALTER TABLE vault_settings ADD COLUMN biometric_public_key BLOB;
+    ALTER TABLE vault_settings ADD COLUMN biometric_key_nonce BLOB;
+    ALTER TABLE vault_settings ADD COLUMN biometric_key_ciphertext BLOB;
+    PRAGMA user_version = 3;
+    COMMIT;
+";
+
 pub fn prepare_database(connection: &Connection) -> StoreResult<()> {
     connection.pragma_update(None, "secure_delete", "ON")?;
     let mut version: i64 = connection.pragma_query_value(None, "user_version", |row| row.get(0))?;
@@ -53,6 +63,10 @@ pub fn prepare_database(connection: &Connection) -> StoreResult<()> {
     }
     if version == 1 {
         connection.execute_batch(UPGRADE_TO_SCHEMA_VERSION_2)?;
+        version = 2;
+    }
+    if version == 2 {
+        connection.execute_batch(UPGRADE_TO_SCHEMA_VERSION_3)?;
     }
     Ok(())
 }

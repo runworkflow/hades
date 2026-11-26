@@ -1,12 +1,18 @@
 import { useState } from "react"
-import { KeyIcon, ShieldKeyholeIcon } from "@solar-icons/react/linear"
+import {
+  FingerprintIcon,
+  KeyIcon,
+  ShieldKeyholeIcon,
+} from "@solar-icons/react/linear"
 
 import { Modal } from "@/components/modal"
+
+import { TouchIdForm } from "@/features/biometrics/touch-id-form"
 
 import { ChangePasswordForm } from "./change-password-form"
 import { NewRecoveryKeyForm } from "./new-recovery-key-form"
 
-type SecurityView = "menu" | "password" | "recovery"
+type SecurityView = "menu" | "password" | "recovery" | "touchId"
 
 const optionClasses =
   "flex items-center gap-4 rounded-2xl bg-raised p-4 text-left transition-colors hover:bg-raised-hover"
@@ -19,6 +25,9 @@ function SecurityContent({ onClose }: { onClose: () => void }) {
   }
   if (view === "recovery") {
     return <NewRecoveryKeyForm onDone={() => setView("menu")} />
+  }
+  if (view === "touchId") {
+    return <TouchIdForm onDone={() => setView("menu")} />
   }
 
   return (
@@ -46,6 +55,19 @@ function SecurityContent({ onClose }: { onClose: () => void }) {
           <span className="font-medium">Make a new recovery key</span>
           <span className="text-sm text-ink-muted">
             The old recovery key stops working.
+          </span>
+        </span>
+      </button>
+      <button
+        type="button"
+        onClick={() => setView("touchId")}
+        className={optionClasses}
+      >
+        <FingerprintIcon size={22} />
+        <span className="flex flex-col">
+          <span className="font-medium">Touch ID unlock</span>
+          <span className="text-sm text-ink-muted">
+            Open the vault with your fingerprint.
           </span>
         </span>
       </button>

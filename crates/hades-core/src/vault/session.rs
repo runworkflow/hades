@@ -1,5 +1,9 @@
 use crate::store::{Store, StoreResult};
 
+use super::biometrics::{
+    BiometricProvider, disable_biometric_unlock, enable_biometric_unlock,
+    is_biometric_unlock_enabled, unlock_with_biometrics,
+};
 use super::credentials::{change_password, regenerate_recovery_key};
 use super::error::{VaultError, VaultResult};
 use super::lifecycle::{create_vault, unlock_with_password, unlock_with_recovery_key};
@@ -51,6 +55,37 @@ impl<S: Store> VaultSession<S> {
 
     pub fn unlock_with_recovery_key(&mut self, recovery_key_text: &str) -> VaultResult<()> {
         self.unlocked_vault = Some(unlock_with_recovery_key(&self.store, recovery_key_text)?);
+        Ok(())
+    }
+
+    pub fn is_biometric_unlock_enabled(&self) -> StoreResult<bool> {
+        is_biometric_unlock_enabled(&self.store)
+    }
+
+    pub fn enable_biometric_unlock<P: BiometricProvider>(
+        &self,
+        current_password: &str,
+        provider: &P,
+    ) -> VaultResult<()> {
+        let vault = self
+            .unlocked_vault
+            .as_ref()
+            .ok_or(VaultError::VaultLocked)?;
+        enable_biometric_unlock(&self.store, vault, current_password, provider)
+    }
+
+    pub fn disable_biometric_unlock(&self) -> VaultResult<()> {
+        self.unlocked_vault
+            .as_ref()
+            .ok_or(VaultError::VaultLocked)?;
+        disable_biometric_unlock(&self.store)
+    }
+
+    pub fn unlock_with_biometrics<P: BiometricProvider>(
+        &mut self,
+        provider: &P,
+    ) -> VaultResult<()> {
+        self.unlocked_vault = Some(unlock_with_biometrics(&self.store, provider)?);
         Ok(())
     }
 

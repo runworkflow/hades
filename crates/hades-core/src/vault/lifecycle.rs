@@ -39,6 +39,7 @@ pub fn create_vault<S: Store>(store: &S, password: &str, created_at: i64) -> Vau
             &vault_key,
             RECOVERY_WRAP_CONTEXT,
         )?,
+        biometric: None,
     };
     store.put_vault_settings(&settings)?;
 

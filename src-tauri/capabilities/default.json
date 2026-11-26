@@ -28,6 +28,10 @@
     "allow-import-file",
     "allow-export-file",
     "allow-change-password",
-    "allow-create-new-recovery-key"
+    "allow-create-new-recovery-key",
+    "allow-get-biometric-status",
+    "allow-enable-biometric-unlock",
+    "allow-disable-biometric-unlock",
+    "allow-unlock-with-biometrics"
   ]
 }

@@ -8,7 +8,10 @@ use super::password::{check_password_strength, normalize_password};
 use super::recovery_key::RecoveryKey;
 use super::unlocked_vault::UnlockedVault;
 
-fn confirmed_settings<S: Store>(store: &S, current_password: &str) -> VaultResult<VaultSettings> {
+pub(super) fn confirmed_settings<S: Store>(
+    store: &S,
+    current_password: &str,
+) -> VaultResult<VaultSettings> {
     let settings = store
         .get_vault_settings()?
         .ok_or(VaultError::NotInitialized)?;

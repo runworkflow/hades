@@ -1,4 +1,4 @@
-use hades_core::{BlobError, StoreError, VaultError};
+use hades_core::{BiometricError, BlobError, StoreError, VaultError};
 use serde::Serialize;
 
 const INTERNAL_MESSAGE: &str = "Something went wrong. Please try again.";
@@ -16,6 +16,28 @@ impl CommandError {
 
     pub fn internal() -> Self {
         Self::new("internal", INTERNAL_MESSAGE.to_string())
+    }
+}
+
+fn biometric_error(error: BiometricError) -> CommandError {
+    match error {
+        BiometricError::Unavailable => CommandError::new(
+            "biometrics_unavailable",
+            "Touch ID is not available on this Mac.".to_string(),
+        ),
+        BiometricError::Cancelled => CommandError::new(
+            "biometrics_cancelled",
+            "Touch ID was cancelled.".to_string(),
+        ),
+        BiometricError::KeyChanged => CommandError::new(
+            "biometrics_changed",
+            "Touch ID no longer matches this vault. Unlock with your password, then turn Touch ID on again."
+                .to_string(),
+        ),
+        BiometricError::Failed => CommandError::new(
+            "biometrics_failed",
+            "Touch ID did not work. Use your password.".to_string(),
+        ),
     }
 }
 
@@ -52,6 +74,8 @@ impl From<VaultError> for CommandError {
             VaultError::Blob(BlobError::TooLarge { maximum_bytes }) => {
                 Self::new("file_too_large", file_too_large_message(maximum_bytes))
             }
+            VaultError::BiometricsNotEnabled => Self::new("biometrics_not_enabled", message),
+            VaultError::Biometric(error) => biometric_error(error),
             VaultError::Blob(BlobError::Corrupt) => Self::new("file_damaged", message),
             VaultError::Blob(_) | VaultError::Crypto(_) | VaultError::Store(_) => Self::internal(),
         }

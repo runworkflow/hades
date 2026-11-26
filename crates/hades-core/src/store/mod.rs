@@ -9,7 +9,7 @@ mod vault_settings;
 pub use envelope::{Envelope, EnvelopeKind};
 pub use error::{StoreError, StoreResult};
 pub use sqlite_store::SqliteStore;
-pub use vault_settings::VaultSettings;
+pub use vault_settings::{BiometricSettings, VaultSettings};
 
 pub trait Store {
     fn put_envelope(&self, envelope: &Envelope) -> StoreResult<()>;

@@ -1,4 +1,5 @@
 mod auto_lock;
+mod biometrics;
 mod credentials;
 mod error;
 mod lifecycle;
@@ -8,6 +9,7 @@ mod session;
 mod unlocked_vault;
 
 pub use auto_lock::{AutoLockMonitor, AutoLockPolicy, LockReason};
+pub use biometrics::{BiometricEnrollment, BiometricError, BiometricProvider};
 pub use error::{VaultError, VaultResult};
 pub use lifecycle::{NewVault, create_vault, unlock_with_password, unlock_with_recovery_key};
 pub use password::MINIMUM_PASSWORD_LENGTH;
